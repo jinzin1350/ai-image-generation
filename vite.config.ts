@@ -23,6 +23,7 @@ export default defineConfig(({ mode }) => {
           '.replit.dev',
           '.repl.co',
           'localhost',
+          'iranretailai.replit.app',
         ],
       },
       plugins: [react()],

@@ -1,0 +1,75 @@
+> fashion-ai-photoshoot@0.0.0 dev
+> vite
+
+
+  VITE v6.4.1  ready in 204 ms
+
+  ➜  Local:   http://localhost:3000/
+  ➜  Network: http://172.31.94.34:3000/
+  ➜  press h + enter to show help
+3:02:12 AM [vite] (client) Pre-transform error: Failed to resolve import "@google/generative-ai" from "components/HistoryPage.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/runner/workspace/components/HistoryPage.tsx:6:35
+  6  |  import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
+  7  |  import { auth, db } from "../firebase";
+  8  |  import { GoogleGenerativeAI } from "@google/generative-ai";
+     |                                      ^
+  9  |  import SparklesIcon from "./icons/SparklesIcon";
+  10 |  import LogoutIcon from "./icons/LogoutIcon";
+3:02:13 AM [vite] Internal server error: Failed to resolve import "@google/generative-ai" from "components/HistoryPage.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/runner/workspace/components/HistoryPage.tsx:6:35
+  6  |  import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
+  7  |  import { auth, db } from "../firebase";
+  8  |  import { GoogleGenerativeAI } from "@google/generative-ai";
+     |                                      ^
+  9  |  import SparklesIcon from "./icons/SparklesIcon";
+  10 |  import LogoutIcon from "./icons/LogoutIcon";
+      at TransformPluginContext._formatLog (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:42528:41)
+      at TransformPluginContext.error (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:42525:16)
+      at normalizeUrl (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:40504:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:40623:37
+      at async Promise.all (index 6)
+      at async TransformPluginContext.transform (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:40550:7)
+      at async EnvironmentPluginContainer.transform (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:42323:18)
+      at async loadAndTransform (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:35739:27)
+      at async viteTransformMiddleware (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:37254:24)
+3:02:25 AM [vite] Internal server error: Failed to resolve import "@google/generative-ai" from "components/HistoryPage.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/runner/workspace/components/HistoryPage.tsx:6:35
+  6  |  import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
+  7  |  import { auth, db } from "../firebase";
+  8  |  import { GoogleGenerativeAI } from "@google/generative-ai";
+     |                                      ^
+  9  |  import SparklesIcon from "./icons/SparklesIcon";
+  10 |  import LogoutIcon from "./icons/LogoutIcon";
+      at TransformPluginContext._formatLog (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:42528:41)
+      at TransformPluginContext.error (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:42525:16)
+      at normalizeUrl (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:40504:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:40623:37
+      at async Promise.all (index 6)
+      at async TransformPluginContext.transform (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:40550:7)
+      at async EnvironmentPluginContainer.transform (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:42323:18)
+      at async loadAndTransform (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:35739:27)
+      at async viteTransformMiddleware (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:37254:24) (x2)
+3:02:28 AM [vite] Internal server error: Failed to resolve import "@google/generative-ai" from "components/HistoryPage.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/runner/workspace/components/HistoryPage.tsx:6:35
+  6  |  import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
+  7  |  import { auth, db } from "../firebase";
+  8  |  import { GoogleGenerativeAI } from "@google/generative-ai";
+     |                                      ^
+  9  |  import SparklesIcon from "./icons/SparklesIcon";
+  10 |  import LogoutIcon from "./icons/LogoutIcon";
+      at TransformPluginContext._formatLog (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:42528:41)
+      at TransformPluginContext.error (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:42525:16)
+      at normalizeUrl (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:40504:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:40623:37
+      at async Promise.all (index 6)
+      at async TransformPluginContext.transform (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:40550:7)
+      at async EnvironmentPluginContainer.transform (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:42323:18)
+      at async loadAndTransform (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:35739:27)
+      at async viteTransformMiddleware (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:37254:24) (x3)

@@ -43,10 +43,18 @@ function MainApp({ user }: { user: User }) {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [productDetails, setProductDetails] = useState({
+    productType: '',
+    color: '',
+    style: '',
+    modelPose: ''
+  });
 
   const isReadyToGenerate = useMemo(() => {
-    return uploadedImage && selectedModelId && selectedBackgroundId;
-  }, [uploadedImage, selectedModelId, selectedBackgroundId]);
+    return uploadedImage && selectedModelId && selectedBackgroundId && 
+           productDetails.productType && productDetails.color && 
+           productDetails.style && productDetails.modelPose;
+  }, [uploadedImage, selectedModelId, selectedBackgroundId, productDetails]);
 
   const handleGenerateClick = async () => {
     if (!isReadyToGenerate || !uploadedImage) return;
@@ -60,7 +68,12 @@ function MainApp({ user }: { user: User }) {
 
     try {
       const modelImageBase64 = await imageUrlToBase64(selectedModel.imageUrl);
-      const resultImage = await generateFashionImage(uploadedImage, modelImageBase64, selectedBackground);
+      const resultImage = await generateFashionImage(
+        uploadedImage, 
+        modelImageBase64, 
+        selectedBackground,
+        productDetails
+      );
       setGeneratedImage(resultImage);
 
       // Upload to Firebase Storage
@@ -94,6 +107,12 @@ function MainApp({ user }: { user: User }) {
     setGeneratedImage(null);
     setError(null);
     setIsLoading(false);
+    setProductDetails({
+      productType: '',
+      color: '',
+      style: '',
+      modelPose: ''
+    });
   };
 
   const handleSignOut = () => {
@@ -148,6 +167,73 @@ function MainApp({ user }: { user: User }) {
               selectedId={selectedBackgroundId} 
               onSelect={setSelectedBackgroundId} 
             />
+            
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold text-slate-800">4. Product Details</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Product Type</label>
+                  <select 
+                    value={productDetails.productType}
+                    onChange={(e) => setProductDetails({...productDetails, productType: e.target.value})}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <option value="">Select...</option>
+                    <option value="T-shirt">T-shirt</option>
+                    <option value="Shirt">Shirt</option>
+                    <option value="Pants">Pants</option>
+                    <option value="Jeans">Jeans</option>
+                    <option value="Dress">Dress</option>
+                    <option value="Jacket">Jacket</option>
+                    <option value="Shoes">Shoes</option>
+                    <option value="Accessories">Accessories</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Color</label>
+                  <input 
+                    type="text"
+                    value={productDetails.color}
+                    onChange={(e) => setProductDetails({...productDetails, color: e.target.value})}
+                    placeholder="e.g., Blue, Red, Black"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Style</label>
+                  <select 
+                    value={productDetails.style}
+                    onChange={(e) => setProductDetails({...productDetails, style: e.target.value})}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <option value="">Select...</option>
+                    <option value="Casual">Casual</option>
+                    <option value="Formal">Formal</option>
+                    <option value="Sport">Sport</option>
+                    <option value="Elegant">Elegant</option>
+                    <option value="Streetwear">Streetwear</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Model Pose</label>
+                  <select 
+                    value={productDetails.modelPose}
+                    onChange={(e) => setProductDetails({...productDetails, modelPose: e.target.value})}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <option value="">Select...</option>
+                    <option value="Standing naturally">Standing naturally</option>
+                    <option value="Walking">Walking</option>
+                    <option value="Sitting">Sitting</option>
+                    <option value="Leaning">Leaning</option>
+                    <option value="Dynamic pose">Dynamic pose</option>
+                  </select>
+                </div>
+              </div>
+            </div>
              <div className="mt-auto pt-8 flex flex-col sm:flex-row gap-4">
               <button 
                 onClick={handleGenerateClick}

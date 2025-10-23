@@ -18,7 +18,13 @@ const getBase64Parts = (base64String: string) => {
 export const generateFashionImage = async (
   clothingImage: string, // base64 string
   modelImage: string, // base64 string
-  background: Option
+  background: Option,
+  productDetails?: {
+    productType: string;
+    color: string;
+    style: string;
+    modelPose: string;
+  }
 ): Promise<string> => {
   if (!process.env.API_KEY) {
     throw new Error("API_KEY environment variable is not set.");
@@ -28,7 +34,25 @@ export const generateFashionImage = async (
   const clothingImageParts = getBase64Parts(clothingImage);
   const modelImageParts = getBase64Parts(modelImage);
 
-  const prompt = `Create a high-quality, photorealistic image for a fashion e-commerce website. The image must feature the model from the second image provided, wearing the clothing item from the first image provided. The background should be: ${background.prompt}. The final image should be stylish, professional, and focus on showcasing the clothing item accurately and appealingly on the specified model.`;
+  const detailsPrompt = productDetails ? `
+Product Type: ${productDetails.productType}
+Color: ${productDetails.color}
+Style: ${productDetails.style}
+Model Pose: ${productDetails.modelPose}
+
+Make the image look natural and realistic, not artificial. The model should look relaxed and natural in the ${productDetails.modelPose} pose. Ensure proper lighting, shadows, and realistic fabric texture. The ${productDetails.color} ${productDetails.productType} should fit naturally on the model's body with realistic wrinkles and folds.` : '';
+
+  const prompt = `Create a high-quality, photorealistic image for a fashion e-commerce website. The image must feature the model from the second image provided, wearing the clothing item from the first image provided. The background should be: ${background.prompt}.${detailsPrompt}
+
+IMPORTANT: Make the final image look completely natural and realistic, not artificial or CGI-like. Pay attention to:
+- Natural lighting and shadows
+- Realistic fabric texture and wrinkles
+- Natural body proportions and pose
+- Seamless integration of clothing on the model
+- Realistic skin tones and textures
+- Natural hair and makeup
+
+The final image should be stylish, professional, and look like a real photoshoot, focusing on showcasing the clothing item accurately and appealingly on the specified model.`;
   
   try {
     const response = await ai.models.generateContent({

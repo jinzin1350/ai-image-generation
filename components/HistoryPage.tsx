@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged, User, signOut } from 'firebase/auth';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { auth, db } from '../firebase';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import SparklesIcon from './icons/SparklesIcon';
 import LogoutIcon from './icons/LogoutIcon';
 
@@ -125,7 +125,7 @@ const HistoryPage: React.FC = () => {
         throw new Error("API key not found");
       }
 
-      const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
       // Fetch image and convert to base64
       const base64 = await new Promise<string>(async (resolve, reject) => {

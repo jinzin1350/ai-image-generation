@@ -47,13 +47,16 @@ function MainApp({ user }: { user: User }) {
     productType: '',
     color: '',
     style: '',
-    modelPose: ''
+    modelPose: '',
+    lightingStyle: '',
+    shotType: ''
   });
 
   const isReadyToGenerate = useMemo(() => {
     return uploadedImage && selectedModelId && selectedBackgroundId && 
            productDetails.productType && productDetails.color && 
-           productDetails.style && productDetails.modelPose;
+           productDetails.style && productDetails.modelPose &&
+           productDetails.lightingStyle && productDetails.shotType;
   }, [uploadedImage, selectedModelId, selectedBackgroundId, productDetails]);
 
   const handleGenerateClick = async () => {
@@ -111,7 +114,9 @@ function MainApp({ user }: { user: User }) {
       productType: '',
       color: '',
       style: '',
-      modelPose: ''
+      modelPose: '',
+      lightingStyle: '',
+      shotType: ''
     });
   };
 
@@ -169,7 +174,7 @@ function MainApp({ user }: { user: User }) {
             />
             
             <div className="space-y-4">
-              <h3 className="text-lg font-bold text-slate-800">4. Product Details</h3>
+              <h3 className="text-lg font-bold text-slate-800">4. Product & Photo Details</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Product Type</label>
@@ -230,6 +235,37 @@ function MainApp({ user }: { user: User }) {
                     <option value="Sitting">Sitting</option>
                     <option value="Leaning">Leaning</option>
                     <option value="Dynamic pose">Dynamic pose</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Lighting Style</label>
+                  <select 
+                    value={productDetails.lightingStyle}
+                    onChange={(e) => setProductDetails({...productDetails, lightingStyle: e.target.value})}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <option value="">Select...</option>
+                    <option value="Soft studio lighting">Soft studio lighting</option>
+                    <option value="Natural daylight">Natural daylight</option>
+                    <option value="Dramatic side lighting">Dramatic side lighting</option>
+                    <option value="Bright and even">Bright and even</option>
+                    <option value="Moody and atmospheric">Moody and atmospheric</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Shot Type</label>
+                  <select 
+                    value={productDetails.shotType}
+                    onChange={(e) => setProductDetails({...productDetails, shotType: e.target.value})}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <option value="">Select...</option>
+                    <option value="Full body shot">Full body shot</option>
+                    <option value="3/4 length shot">3/4 length shot</option>
+                    <option value="Upper body close-up">Upper body close-up</option>
+                    <option value="Detail shot">Detail shot</option>
                   </select>
                 </div>
               </div>

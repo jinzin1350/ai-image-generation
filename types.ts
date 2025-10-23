@@ -10,4 +10,6 @@ export interface ProductDetails {
   color: string;
   style: string;
   modelPose: string;
+  lightingStyle: string;
+  shotType: string;
 }

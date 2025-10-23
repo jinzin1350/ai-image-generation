@@ -24,6 +24,8 @@ export const generateFashionImage = async (
     color: string;
     style: string;
     modelPose: string;
+    lightingStyle: string;
+    shotType: string;
   }
 ): Promise<string> => {
   if (!process.env.API_KEY) {
@@ -35,24 +37,58 @@ export const generateFashionImage = async (
   const modelImageParts = getBase64Parts(modelImage);
 
   const detailsPrompt = productDetails ? `
-Product Type: ${productDetails.productType}
-Color: ${productDetails.color}
-Style: ${productDetails.style}
-Model Pose: ${productDetails.modelPose}
 
-Make the image look natural and realistic, not artificial. The model should look relaxed and natural in the ${productDetails.modelPose} pose. Ensure proper lighting, shadows, and realistic fabric texture. The ${productDetails.color} ${productDetails.productType} should fit naturally on the model's body with realistic wrinkles and folds.` : '';
+PRODUCT DETAILS:
+- Type: ${productDetails.productType}
+- Color: ${productDetails.color}
+- Style: ${productDetails.style}
+- Model Pose: ${productDetails.modelPose}
 
-  const prompt = `Create a high-quality, photorealistic image for a fashion e-commerce website. The image must feature the model from the second image provided, wearing the clothing item from the first image provided. The background should be: ${background.prompt}.${detailsPrompt}
+MODEL REQUIREMENTS:
+- Use the exact facial features, skin tone, and hair from the provided model image
+- Maintain the model's natural body proportions and physique
+- Keep the model's authentic appearance - do not make them look artificial or overly edited
+- The model should appear relaxed and confident in the ${productDetails.modelPose} pose
+- Natural facial expression that matches the style (e.g., calm for casual, confident for formal)
 
-IMPORTANT: Make the final image look completely natural and realistic, not artificial or CGI-like. Pay attention to:
-- Natural lighting and shadows
-- Realistic fabric texture and wrinkles
-- Natural body proportions and pose
-- Seamless integration of clothing on the model
-- Realistic skin tones and textures
-- Natural hair and makeup
+CLOTHING INTEGRATION:
+- The ${productDetails.color} ${productDetails.productType} must fit naturally on the model's body
+- Show realistic fabric wrinkles, folds, and draping
+- Proper shadows and highlights on the fabric to show texture and depth
+- The clothing should interact naturally with the model's body and pose
+- Ensure the garment's proportions are accurate and realistic
 
-The final image should be stylish, professional, and look like a real photoshoot, focusing on showcasing the clothing item accurately and appealingly on the specified model.`;
+IMAGE QUALITY & REALISM:
+- Professional photography lighting with soft shadows
+- Natural color grading - avoid oversaturation or artificial filters
+- Sharp focus on the clothing item and model
+- Depth of field that keeps the subject clear and background slightly softer
+- Studio-quality composition similar to high-end fashion catalogs
+- NO artificial CGI look, NO plastic-like skin, NO fake lighting` : '';
+
+  const prompt = `Create an ultra-realistic, professional fashion photoshoot image for an e-commerce website.
+
+IMAGE COMPOSITION:
+- Main subject: The model from the second image wearing the clothing item from the first image
+- Background: ${background.prompt}
+- Camera angle: Eye-level, professional fashion photography perspective
+- Framing: ${productDetails?.shotType || 'Full body shot showing the complete outfit'}
+- Lighting: ${productDetails?.lightingStyle || 'Professional studio lighting'}${detailsPrompt}
+
+CRITICAL REALISM CHECKLIST:
+✓ Natural, professional studio lighting (avoid harsh shadows or overexposure)
+✓ Realistic skin texture with natural pores and subtle imperfections
+✓ Authentic fabric texture showing weave, wrinkles, and material properties
+✓ Proper color accuracy for both skin tones and clothing
+✓ Natural body proportions and realistic pose dynamics
+✓ Seamless integration between model and clothing (no floating or misaligned garments)
+✓ Professional depth of field and focus
+✓ Natural hair movement and styling
+✓ Subtle makeup that enhances without looking artificial
+✓ Realistic shadows and reflections
+✓ High-resolution detail throughout the image
+
+The final image MUST look like it was taken by a professional fashion photographer in a real photoshoot - not computer-generated or artificially composited. This should be indistinguishable from actual product photography used in premium fashion e-commerce sites.`;
   
   try {
     const response = await ai.models.generateContent({

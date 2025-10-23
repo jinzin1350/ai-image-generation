@@ -41,7 +41,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, uploadedIm
 
   return (
     <div className="w-full">
-      <h2 className="text-lg font-semibold text-slate-700 mb-2">1. Upload Clothing Item</h2>
       <input
         type="file"
         ref={fileInputRef}
@@ -50,10 +49,10 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, uploadedIm
         className="hidden"
       />
       <label
-        className={`group flex justify-center items-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-colors duration-300 ease-in-out ${
-          uploadedImage 
-            ? 'border-indigo-400 bg-indigo-50' 
-            : 'border-slate-300 hover:border-indigo-400 hover:bg-indigo-50'
+        className={`group flex justify-center items-center w-full h-56 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-300 ease-in-out ${
+          uploadedImage
+            ? 'border-indigo-400 bg-indigo-50'
+            : 'border-slate-300 hover:border-indigo-500 hover:bg-indigo-50 hover:shadow-md'
         }`}
         onClick={() => fileInputRef.current?.click()}
         onDrop={handleDrop}
@@ -63,9 +62,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload, uploadedIm
           <img src={uploadedImage} alt="Uploaded clothing" className="max-h-full max-w-full object-contain rounded-lg p-2" />
         ) : (
           <div className="text-center text-slate-500">
-            <UploadIcon className="mx-auto h-10 w-10 mb-2 text-slate-400 group-hover:text-indigo-500 transition-colors" />
-            <p className="font-semibold">Click to upload or drag & drop</p>
-            <p className="text-sm">PNG, JPG, or WEBP</p>
+            <UploadIcon className="mx-auto h-12 w-12 mb-3 text-slate-400 group-hover:text-indigo-500 transition-colors" />
+            <p className="font-bold text-lg mb-1">Click to upload or drag & drop</p>
+            <p className="text-sm text-slate-400">PNG, JPG, or WEBP (Max 10MB)</p>
           </div>
         )}
       </label>

@@ -136,67 +136,148 @@ function MainApp({ user }: { user: User }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 font-sans">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <header className="mb-8">
-            <div className="flex flex-col gap-4">
-                <div className="flex justify-between items-center">
-                    <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-800 tracking-tight">
-                        Fashion AI <span className="text-indigo-600">Photoshoot</span>
-                    </h1>
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => navigate('/history')}
-                            className="px-4 py-2 bg-white text-indigo-600 rounded-lg shadow-sm hover:shadow-md hover:bg-indigo-50 transition-all font-semibold text-sm"
-                        >
-                            تاریخچه من
-                        </button>
-                        <button
-                            onClick={handleSignOut}
-                            className="flex items-center justify-center p-2.5 rounded-lg text-slate-600 bg-white shadow-sm hover:shadow-md hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
-                            aria-label="Sign out"
-                        >
-                           <LogoutIcon className="w-5 h-5" />
-                        </button>
-                    </div>
-                </div>
-                <div className="flex justify-between items-center">
-                    <p className="text-base text-slate-600 max-w-2xl">
-                        Create professional product photos in seconds. Upload your clothing item, pick a model and a background, and let AI do the rest.
-                    </p>
-                    <span className="text-sm text-slate-500 hidden md:block">{user.email}</span>
-                </div>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 font-sans">
+      {/* Top Navigation Bar */}
+      <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <SparklesIcon className="w-5 h-5 text-white" />
+              </div>
+              <h1 className="text-xl font-bold text-slate-800">
+                Fashion AI
+              </h1>
             </div>
-        </header>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-slate-600 hidden sm:block">{user.email}</span>
+              <button
+                onClick={() => navigate('/history')}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium text-sm"
+              >
+                My History
+              </button>
+              <button
+                onClick={handleSignOut}
+                className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
+                aria-label="Sign out"
+              >
+                <LogoutIcon className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+            Create Stunning Product Photos with AI
+          </h2>
+          <p className="text-lg text-indigo-100 max-w-2xl mx-auto">
+            Transform your clothing items into professional photoshoots in seconds. Just upload, select, and generate.
+          </p>
+        </div>
+      </div>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        {/* Progress Steps */}
+        <div className="mb-8">
+          <div className="flex items-center justify-center gap-2 sm:gap-4">
+            <div className="flex items-center">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${uploadedImage ? 'bg-green-500 text-white' : 'bg-indigo-600 text-white'}`}>
+                {uploadedImage ? '✓' : '1'}
+              </div>
+              <span className="ml-2 text-sm font-medium text-slate-700 hidden sm:block">Upload</span>
+            </div>
+            <div className="w-12 h-0.5 bg-slate-300"></div>
+            <div className="flex items-center">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${selectedModelId ? 'bg-green-500 text-white' : uploadedImage ? 'bg-indigo-600 text-white' : 'bg-slate-300 text-slate-600'}`}>
+                {selectedModelId ? '✓' : '2'}
+              </div>
+              <span className="ml-2 text-sm font-medium text-slate-700 hidden sm:block">Model</span>
+            </div>
+            <div className="w-12 h-0.5 bg-slate-300"></div>
+            <div className="flex items-center">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${selectedBackgroundId ? 'bg-green-500 text-white' : selectedModelId ? 'bg-indigo-600 text-white' : 'bg-slate-300 text-slate-600'}`}>
+                {selectedBackgroundId ? '✓' : '3'}
+              </div>
+              <span className="ml-2 text-sm font-medium text-slate-700 hidden sm:block">Background</span>
+            </div>
+            <div className="w-12 h-0.5 bg-slate-300"></div>
+            <div className="flex items-center">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${isReadyToGenerate ? 'bg-green-500 text-white' : selectedBackgroundId ? 'bg-indigo-600 text-white' : 'bg-slate-300 text-slate-600'}`}>
+                {isReadyToGenerate ? '✓' : '4'}
+              </div>
+              <span className="ml-2 text-sm font-medium text-slate-700 hidden sm:block">Details</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Panel: Controls */}
-          <div className="space-y-6">
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <ImageUploader onImageUpload={setUploadedImage} uploadedImage={uploadedImage} />
+          <div className="lg:col-span-2 space-y-6">
+            {/* Step 1: Upload */}
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-4">
+                <h3 className="text-white font-bold text-lg flex items-center gap-2">
+                  <span className="bg-white text-indigo-600 w-6 h-6 rounded-full flex items-center justify-center text-sm">1</span>
+                  Upload Your Product
+                </h3>
+              </div>
+              <div className="p-6">
+                <ImageUploader onImageUpload={setUploadedImage} uploadedImage={uploadedImage} />
+              </div>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <OptionSelector
-                title="2. Choose a Model"
-                options={CATEGORIZED_MODELS}
-                selectedId={selectedModelId}
-                onSelect={setSelectedModelId}
-              />
+            {/* Step 2: Model */}
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-4">
+                <h3 className="text-white font-bold text-lg flex items-center gap-2">
+                  <span className="bg-white text-indigo-600 w-6 h-6 rounded-full flex items-center justify-center text-sm">2</span>
+                  Choose Your Model
+                </h3>
+              </div>
+              <div className="p-6">
+                <OptionSelector
+                  title=""
+                  options={CATEGORIZED_MODELS}
+                  selectedId={selectedModelId}
+                  onSelect={setSelectedModelId}
+                />
+              </div>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <OptionSelector
-                title="3. Pick a Background"
-                options={BACKGROUNDS}
-                selectedId={selectedBackgroundId}
-                onSelect={setSelectedBackgroundId}
-              />
+            {/* Step 3: Background */}
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-4">
+                <h3 className="text-white font-bold text-lg flex items-center gap-2">
+                  <span className="bg-white text-indigo-600 w-6 h-6 rounded-full flex items-center justify-center text-sm">3</span>
+                  Select Background
+                </h3>
+              </div>
+              <div className="p-6">
+                <OptionSelector
+                  title=""
+                  options={BACKGROUNDS}
+                  selectedId={selectedBackgroundId}
+                  onSelect={setSelectedBackgroundId}
+                />
+              </div>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-md space-y-4">
-              <h3 className="text-lg font-bold text-slate-800">4. Product & Photo Details</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Step 4: Details */}
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-4">
+                <h3 className="text-white font-bold text-lg flex items-center gap-2">
+                  <span className="bg-white text-indigo-600 w-6 h-6 rounded-full flex items-center justify-center text-sm">4</span>
+                  Customize Details
+                </h3>
+              </div>
+              <div className="p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Product Type</label>
                   <select 
@@ -292,28 +373,41 @@ function MainApp({ user }: { user: User }) {
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-md flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={handleGenerateClick}
-                disabled={!isReadyToGenerate || isLoading}
-                className="flex-1 inline-flex items-center justify-center px-6 py-4 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-slate-400 disabled:cursor-not-allowed transition-all duration-200"
-              >
-                <SparklesIcon className="w-5 h-5 mr-2 -ml-1" />
-                {isLoading ? 'Generating...' : 'Generate Photoshoot'}
-              </button>
-              <button
-                onClick={handleReset}
-                className="px-6 py-4 border border-slate-300 text-base font-medium rounded-lg text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-              >
-                Reset
-              </button>
+            {/* Action Buttons */}
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button
+                  onClick={handleGenerateClick}
+                  disabled={!isReadyToGenerate || isLoading}
+                  className="flex-1 inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-bold rounded-xl shadow-lg text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:from-slate-400 disabled:to-slate-400 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100"
+                >
+                  <SparklesIcon className="w-6 h-6 mr-2" />
+                  {isLoading ? 'Generating Magic...' : 'Generate Photoshoot'}
+                </button>
+                <button
+                  onClick={handleReset}
+                  className="px-6 py-4 border-2 border-slate-300 text-base font-semibold rounded-xl text-slate-700 bg-white hover:bg-slate-50 hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
+                >
+                  Reset All
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Right Panel: Display */}
-          <div className="lg:sticky lg:top-6 lg:self-start">
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <GeneratedImageDisplay image={generatedImage} isLoading={isLoading} error={error} />
+          {/* Right Panel: Result Display */}
+          <div className="lg:col-span-1">
+            <div className="lg:sticky lg:top-24">
+              <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+                <div className="bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-4">
+                  <h3 className="text-white font-bold text-lg flex items-center gap-2">
+                    <SparklesIcon className="w-5 h-5" />
+                    Your AI Photoshoot
+                  </h3>
+                </div>
+                <div className="p-6">
+                  <GeneratedImageDisplay image={generatedImage} isLoading={isLoading} error={error} />
+                </div>
+              </div>
             </div>
           </div>
         </div>

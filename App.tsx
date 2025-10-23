@@ -371,7 +371,7 @@ function MainApp({ user }: { user: User }) {
                   </select>
                 </div>
               </div>
-              </div>
+            </div>
             </div>
 
             {/* Action Buttons */}

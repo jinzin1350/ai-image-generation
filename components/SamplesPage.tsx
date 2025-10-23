@@ -1,8 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase';
+import { supabase } from '../supabase';
 import SparklesIcon from './icons/SparklesIcon';
 
 interface Sample {
@@ -25,15 +24,20 @@ const SamplesPage: React.FC = () => {
   useEffect(() => {
     const loadSamples = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'samples'));
-        const loadedSamples: Sample[] = [];
-        
-        querySnapshot.forEach((doc) => {
-          loadedSamples.push({
-            id: doc.id,
-            ...doc.data()
-          } as Sample);
-        });
+        const { data, error } = await supabase
+          .from('samples')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        const loadedSamples: Sample[] = data.map(item => ({
+          id: item.id,
+          category: item.category,
+          beforeImageUrl: item.before_image_url,
+          afterImageUrl: item.after_image_url,
+          createdAt: item.created_at,
+        }));
 
         // Group by category
         const grouped: SamplesByCategory = {};

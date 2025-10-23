@@ -1,9 +1,5 @@
 import React, { useState } from 'react';
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword 
-} from "firebase/auth";
-import { auth } from '../firebase';
+import { supabase } from '../supabase';
 import SparklesIcon from './icons/SparklesIcon';
 
 const Auth: React.FC = () => {

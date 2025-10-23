@@ -1,8 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
-import { onAuthStateChanged, signOut, User } from "firebase/auth";
-import { auth, db, storage } from './firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { supabase } from './supabase';
+import type { User } from '@supabase/supabase-js';
 
 import { CATEGORIZED_MODELS, ALL_MODELS, BACKGROUNDS } from './constants';
 import { generateFashionImage } from './services/geminiService';
@@ -79,22 +78,34 @@ function MainApp({ user }: { user: User }) {
       );
       setGeneratedImage(resultImage);
 
-      // Upload to Firebase Storage
-      const { ref, uploadString, getDownloadURL } = await import('firebase/storage');
-      const storageRef = ref(storage, `generated/${user.uid}/${Date.now()}.png`);
+      // Convert base64 to blob
+      const base64Response = await fetch(resultImage);
+      const blob = await base64Response.blob();
       
-      // Upload base64 image
-      await uploadString(storageRef, resultImage, 'data_url');
+      const fileName = `${user.id}/${Date.now()}.png`;
       
-      // Get download URL
-      const downloadURL = await getDownloadURL(storageRef);
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('generated')
+        .upload(fileName, blob);
 
-      // Save URL to Firestore
-      await addDoc(collection(db, 'generated_images'), {
-        userId: user.uid,
-        imageUrl: downloadURL,
-        createdAt: new Date().toISOString(),
-      });
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('generated')
+        .getPublicUrl(fileName);
+
+      // Save to Supabase database
+      const { error: dbError } = await supabase
+        .from('generated_images')
+        .insert({
+          user_id: user.id,
+          image_url: urlData.publicUrl,
+          created_at: new Date().toISOString(),
+        });
+
+      if (dbError) throw dbError;
     } catch (e: any) {
       console.error("Generation failed:", e);
       setError(e.message || 'An unknown error occurred during image generation.');
@@ -120,8 +131,8 @@ function MainApp({ user }: { user: User }) {
     });
   };
 
-  const handleSignOut = () => {
-    signOut(auth).catch((error) => console.error("Sign out error", error));
+  const handleSignOut = async () => {
+    await supabase.auth.signOut().catch((error) => console.error("Sign out error", error));
   };
 
   return (
@@ -304,11 +315,18 @@ function App() {
   const [showLanding, setShowLanding] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
       setAuthLoading(false);
     });
-    return () => unsubscribe();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   if (authLoading) {

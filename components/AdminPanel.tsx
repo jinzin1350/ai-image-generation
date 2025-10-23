@@ -1,9 +1,7 @@
 
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { collection, addDoc } from 'firebase/firestore';
-import { storage, db } from '../firebase';
+import { supabase } from '../supabase';
 import SparklesIcon from './icons/SparklesIcon';
 import UploadIcon from './icons/UploadIcon';
 
@@ -59,23 +57,45 @@ const AdminPanel: React.FC = () => {
     setLoading(true);
 
     try {
-      // Upload before image to Firebase Storage
-      const beforeRef = ref(storage, `samples/${Date.now()}_before_${upload.beforeImage.name}`);
-      await uploadBytes(beforeRef, upload.beforeImage);
-      const beforeUrl = await getDownloadURL(beforeRef);
+      const timestamp = Date.now();
+      
+      // Upload before image to Supabase Storage
+      const beforeFileName = `${timestamp}_before_${upload.beforeImage.name}`;
+      const { error: beforeError } = await supabase.storage
+        .from('samples')
+        .upload(beforeFileName, upload.beforeImage);
 
-      // Upload after image to Firebase Storage
-      const afterRef = ref(storage, `samples/${Date.now()}_after_${upload.afterImage.name}`);
-      await uploadBytes(afterRef, upload.afterImage);
-      const afterUrl = await getDownloadURL(afterRef);
+      if (beforeError) throw beforeError;
 
-      // Save to Firestore
-      await addDoc(collection(db, 'samples'), {
-        category: upload.category,
-        beforeImageUrl: beforeUrl,
-        afterImageUrl: afterUrl,
-        createdAt: new Date().toISOString(),
-      });
+      // Get public URL for before image
+      const { data: beforeData } = supabase.storage
+        .from('samples')
+        .getPublicUrl(beforeFileName);
+
+      // Upload after image to Supabase Storage
+      const afterFileName = `${timestamp}_after_${upload.afterImage.name}`;
+      const { error: afterError } = await supabase.storage
+        .from('samples')
+        .upload(afterFileName, upload.afterImage);
+
+      if (afterError) throw afterError;
+
+      // Get public URL for after image
+      const { data: afterData } = supabase.storage
+        .from('samples')
+        .getPublicUrl(afterFileName);
+
+      // Save to Supabase database
+      const { error: dbError } = await supabase
+        .from('samples')
+        .insert({
+          category: upload.category,
+          before_image_url: beforeData.publicUrl,
+          after_image_url: afterData.publicUrl,
+          created_at: new Date().toISOString(),
+        });
+
+      if (dbError) throw dbError;
 
       setSuccess('نمونه با موفقیت آپلود شد!');
       

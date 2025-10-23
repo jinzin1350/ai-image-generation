@@ -62,27 +62,87 @@ const HistoryPage: React.FC = () => {
     }
   };
 
+  const compressImage = async (blob: Blob, maxWidth: number = 800): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(blob);
+      
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Canvas context not available'));
+          return;
+        }
+        
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob(
+          (compressedBlob) => {
+            if (compressedBlob) {
+              resolve(compressedBlob);
+            } else {
+              reject(new Error('Compression failed'));
+            }
+          },
+          'image/jpeg',
+          0.8
+        );
+      };
+      
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error('Image load failed'));
+      };
+      
+      img.src = url;
+    });
+  };
+
   const generateInstagramCaption = async (imageUrl: string, imageId: string) => {
     setGeneratingCaption(imageId);
     
     try {
       if (!process.env.API_KEY) {
-        throw new Error("API key not found");
+        throw new Error("کلید API یافت نشد");
       }
 
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       
-      // Fetch image and convert to base64
+      // Fetch image
       const response = await fetch(imageUrl);
+      if (!response.ok) {
+        throw new Error('دانلود تصویر با خطا مواجه شد');
+      }
+      
       const blob = await response.blob();
-      const base64 = await new Promise<string>((resolve) => {
+      
+      // Compress image to reduce size
+      const compressedBlob = await compressImage(blob, 800);
+      
+      // Convert to base64
+      const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result as string);
-        reader.readAsDataURL(blob);
+        reader.onerror = () => reject(new Error('خواندن تصویر با خطا مواجه شد'));
+        reader.readAsDataURL(compressedBlob);
       });
 
       const match = base64.match(/^data:(image\/.+);base64,(.+)$/);
-      if (!match) throw new Error('Invalid image format');
+      if (!match) throw new Error('فرمت تصویر نامعتبر است');
 
       const prompt = `این یک عکس فشن و محصول پوشاک است که برای اینستاگرام باید کپشن جذاب و خلاقانه بنویسی.
       
@@ -115,9 +175,10 @@ const HistoryPage: React.FC = () => {
       const caption = result.text || 'کپشن تولید نشد';
       setCaptions(prev => ({ ...prev, [imageId]: caption }));
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating caption:', error);
-      setCaptions(prev => ({ ...prev, [imageId]: 'خطا در تولید کپشن' }));
+      const errorMessage = error.message || 'خطا در تولید کپشن';
+      setCaptions(prev => ({ ...prev, [imageId]: errorMessage }));
     } finally {
       setGeneratingCaption(null);
     }

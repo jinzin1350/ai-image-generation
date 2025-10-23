@@ -1,62 +1,58 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase';
 import SparklesIcon from './icons/SparklesIcon';
-import { generateSampleImage, SAMPLE_DATA } from '../services/sampleGenerationService';
 
-interface GeneratedSample {
-  before: string;
-  after: string;
-  isLoading: boolean;
-  error: string | null;
+interface Sample {
+  id: string;
+  category: string;
+  beforeImageUrl: string;
+  afterImageUrl: string;
+  createdAt: string;
+}
+
+interface SamplesByCategory {
+  [category: string]: Sample[];
 }
 
 const SamplesPage: React.FC = () => {
   const navigate = useNavigate();
-  const [generatedSamples, setGeneratedSamples] = useState<{ [key: string]: GeneratedSample }>({});
+  const [samples, setSamples] = useState<SamplesByCategory>({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Generate samples on component mount
-    SAMPLE_DATA.forEach((category, categoryIndex) => {
-      category.items.forEach((item, itemIndex) => {
-        const key = `${categoryIndex}-${itemIndex}`;
+    const loadSamples = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'samples'));
+        const loadedSamples: Sample[] = [];
         
-        setGeneratedSamples(prev => ({
-          ...prev,
-          [key]: {
-            before: item.clothingUrl,
-            after: '',
-            isLoading: true,
-            error: null
-          }
-        }));
+        querySnapshot.forEach((doc) => {
+          loadedSamples.push({
+            id: doc.id,
+            ...doc.data()
+          } as Sample);
+        });
 
-        generateSampleImage(item.clothingUrl, item.modelUrl, item.background)
-          .then(generatedImage => {
-            setGeneratedSamples(prev => ({
-              ...prev,
-              [key]: {
-                before: item.clothingUrl,
-                after: generatedImage,
-                isLoading: false,
-                error: null
-              }
-            }));
-          })
-          .catch(error => {
-            console.error(`Error generating sample ${key}:`, error);
-            setGeneratedSamples(prev => ({
-              ...prev,
-              [key]: {
-                before: item.clothingUrl,
-                after: '',
-                isLoading: false,
-                error: 'خطا در تولید تصویر'
-              }
-            }));
-          });
-      });
-    });
+        // Group by category
+        const grouped: SamplesByCategory = {};
+        loadedSamples.forEach(sample => {
+          if (!grouped[sample.category]) {
+            grouped[sample.category] = [];
+          }
+          grouped[sample.category].push(sample);
+        });
+
+        setSamples(grouped);
+      } catch (error) {
+        console.error('Error loading samples:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSamples();
   }, []);
 
   return (
@@ -109,24 +105,33 @@ const SamplesPage: React.FC = () => {
       {/* Samples Grid */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {SAMPLE_DATA.map((category, categoryIndex) => (
-            <div key={categoryIndex} className="mb-20 last:mb-0">
-              <h3 className="text-4xl font-black text-gray-900 mb-10 text-center">
-                {category.category}
-              </h3>
-              
-              <div className="grid md:grid-cols-2 gap-12">
-                {category.items.map((item, itemIndex) => {
-                  const key = `${categoryIndex}-${itemIndex}`;
-                  const sample = generatedSamples[key];
-
-                  return (
-                    <div key={itemIndex} className="bg-white rounded-3xl shadow-xl overflow-hidden relative">
+          {loading ? (
+            <div className="text-center py-20">
+              <svg className="animate-spin h-16 w-16 text-violet-600 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <p className="text-violet-600 font-semibold text-lg">در حال بارگذاری نمونه کارها...</p>
+            </div>
+          ) : Object.keys(samples).length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-gray-600 text-xl font-semibold">هنوز نمونه کاری آپلود نشده است</p>
+            </div>
+          ) : (
+            Object.entries(samples).map(([category, items]) => (
+              <div key={category} className="mb-20 last:mb-0">
+                <h3 className="text-4xl font-black text-gray-900 mb-10 text-center">
+                  {category}
+                </h3>
+                
+                <div className="grid md:grid-cols-2 gap-12">
+                  {items.map((sample) => (
+                    <div key={sample.id} className="bg-white rounded-3xl shadow-xl overflow-hidden relative">
                       <div className="grid grid-cols-2">
                         {/* Before */}
                         <div className="relative group">
                           <img
-                            src={sample?.before || item.clothingUrl}
+                            src={sample.beforeImageUrl}
                             alt="قبل"
                             className="w-full h-80 object-cover"
                           />
@@ -140,54 +145,34 @@ const SamplesPage: React.FC = () => {
                         
                         {/* After */}
                         <div className="relative group">
-                          {sample?.isLoading ? (
-                            <div className="w-full h-80 bg-gradient-to-br from-violet-100 to-indigo-100 flex items-center justify-center">
-                              <div className="text-center">
-                                <svg className="animate-spin h-12 w-12 text-violet-600 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <p className="text-violet-600 font-semibold">در حال تولید...</p>
-                              </div>
-                            </div>
-                          ) : sample?.error ? (
-                            <div className="w-full h-80 bg-red-50 flex items-center justify-center">
-                              <p className="text-red-600 font-semibold">{sample.error}</p>
-                            </div>
-                          ) : (
-                            <>
-                              <img
-                                src={sample?.after}
-                                alt="بعد"
-                                className="w-full h-80 object-cover"
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                              <div className="absolute bottom-4 left-0 right-0 text-center">
-                                <span className="inline-block bg-green-500 text-white px-6 py-2 rounded-full font-bold text-sm">
-                                  بعد
-                                </span>
-                              </div>
-                            </>
-                          )}
+                          <img
+                            src={sample.afterImageUrl}
+                            alt="بعد"
+                            className="w-full h-80 object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                          <div className="absolute bottom-4 left-0 right-0 text-center">
+                            <span className="inline-block bg-green-500 text-white px-6 py-2 rounded-full font-bold text-sm">
+                              بعد
+                            </span>
+                          </div>
                         </div>
                       </div>
                       
                       {/* Arrow Indicator */}
-                      {!sample?.isLoading && !sample?.error && (
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                          <div className="w-12 h-12 bg-white rounded-full shadow-2xl flex items-center justify-center">
-                            <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                            </svg>
-                          </div>
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                        <div className="w-12 h-12 bg-white rounded-full shadow-2xl flex items-center justify-center">
+                          <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                          </svg>
                         </div>
-                      )}
+                      </div>
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </section>
 

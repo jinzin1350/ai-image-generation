@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
@@ -12,6 +11,7 @@ import GeneratedImageDisplay from './components/GeneratedImageDisplay';
 import Auth from './components/Auth';
 import LandingPage from './components/LandingPage';
 import SamplesPage from './components/SamplesPage';
+import AdminPanel from './components/AdminPanel';
 import SparklesIcon from './components/icons/SparklesIcon';
 import LogoutIcon from './components/icons/LogoutIcon';
 import type { Option } from './types';
@@ -67,7 +67,7 @@ function MainApp() {
 
     const selectedModel = ALL_MODELS.find(m => m.id === selectedModelId) as Option;
     const selectedBackground = BACKGROUNDS.find(b => b.id === selectedBackgroundId) as Option;
-    
+
     try {
       const modelImageBase64 = await imageUrlToBase64(selectedModel.imageUrl);
       const resultImage = await generateFashionImage(uploadedImage, modelImageBase64, selectedBackground);
@@ -92,7 +92,7 @@ function MainApp() {
   const handleSignOut = () => {
     signOut(auth).catch((error) => console.error("Sign out error", error));
   };
-  
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-slate-100 flex items-center justify-center">
@@ -188,9 +188,10 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<MainApp />} />
-        <Route path="/samples" element={<SamplesPage />} />
-      </Routes>
+        <Route path="/" element={user ? <MainApp /> : <LandingPage />} />
+          <Route path="/samples" element={<SamplesPage />} />
+          <Route path="/admin" element={<AdminPanel />} />
+        </Routes>
     </Router>
   );
 }

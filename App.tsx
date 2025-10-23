@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
-import { auth } from './firebase';
+import { auth, db } from './firebase';
+import { collection, addDoc } from 'firebase/firestore';
 
 import { CATEGORIZED_MODELS, ALL_MODELS, BACKGROUNDS } from './constants';
 import { generateFashionImage } from './services/geminiService';
@@ -12,6 +13,7 @@ import Auth from './components/Auth';
 import LandingPage from './components/LandingPage';
 import SamplesPage from './components/SamplesPage';
 import AdminPanel from './components/AdminPanel';
+import HistoryPage from './components/HistoryPage';
 import SparklesIcon from './components/icons/SparklesIcon';
 import LogoutIcon from './components/icons/LogoutIcon';
 import type { Option } from './types';
@@ -60,6 +62,13 @@ function MainApp({ user }: { user: User }) {
       const modelImageBase64 = await imageUrlToBase64(selectedModel.imageUrl);
       const resultImage = await generateFashionImage(uploadedImage, modelImageBase64, selectedBackground);
       setGeneratedImage(resultImage);
+
+      // Save to Firestore
+      await addDoc(collection(db, 'generated_images'), {
+        userId: user.uid,
+        imageUrl: resultImage,
+        createdAt: new Date().toISOString(),
+      });
     } catch (e: any) {
       console.error("Generation failed:", e);
       setError(e.message || 'An unknown error occurred during image generation.');
@@ -96,6 +105,12 @@ function MainApp({ user }: { user: User }) {
                 </div>
                 <div className="flex items-center gap-3">
                     <span className="text-sm text-slate-600 hidden sm:block">{user.email}</span>
+                    <button
+                        onClick={() => navigate('/history')}
+                        className="px-4 py-2 bg-white text-indigo-600 rounded-lg shadow-md hover:bg-indigo-50 transition-colors font-semibold text-sm"
+                    >
+                        تاریخچه من
+                    </button>
                     <button 
                         onClick={handleSignOut} 
                         className="flex items-center justify-center p-2 rounded-full text-slate-600 bg-white shadow-md hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
@@ -183,6 +198,7 @@ function App() {
         <Route path="/" element={user ? <MainApp user={user} /> : <LandingPage />} />
         <Route path="/samples" element={<SamplesPage />} />
         <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/history" element={user ? <HistoryPage /> : <LandingPage />} />
       </Routes>
     </Router>
   );

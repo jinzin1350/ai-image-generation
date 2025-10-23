@@ -47,7 +47,7 @@ const Auth: React.FC = () => {
             </p>
         </div>
         <div className="w-full max-w-md">
-            <form 
+            <form
                 onSubmit={handleSubmit}
                 className="bg-slate-800 shadow-lg rounded-2xl px-8 pt-6 pb-8 mb-4"
             >

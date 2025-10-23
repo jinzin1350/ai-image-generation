@@ -1,8 +1,27 @@
-modules = ["nodejs-20"]
+run = "npm run dev"
+entrypoint = "index.tsx"
+hidden = [".config", "package-lock.json"]
+
+[languages]
+
+[languages.javascript]
+pattern = "**/{*.js,*.jsx,*.ts,*.tsx}"
+
+[languages.javascript.languageServer]
+start = "typescript-language-server --stdio"
 
 [nix]
-channel = "stable-25_05"
+channel = "stable-22_11"
 
-[agent]
-integrations = ["javascript_gemini:1.0.0", "javascript_database:1.0.0"]
-expertMode = true
+[deployment]
+build = ["sh", "-c", "npm install && npm run build"]
+run = ["sh", "-c", "npx vite preview --port 3000 --host 0.0.0.0"]
+deploymentTarget = "cloudrun"
+
+[[ports]]
+localPort = 3000
+externalPort = 80
+
+[[ports]]
+localPort = 5173
+externalPort = 3001

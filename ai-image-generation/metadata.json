@@ -1,0 +1,5 @@
+{
+  "name": "Fashion AI Photoshoot",
+  "description": "An application for fashion e-commerce that allows users to upload a photo of a clothing item, select a model and a background, and then use AI to generate a professional-looking product photoshoot image.",
+  "requestFramePermissions": []
+}

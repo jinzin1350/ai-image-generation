@@ -1,0 +1,103 @@
+Download the React DevTools for a better development experience: https://react.dev/link/react-devtools
+history:1 Access to fetch at 'https://firebasestorage.googleapis.com/v0/b/ai-group-diet-tracker.firebasestorage.app/o/generated%2F2OUxlq4wk1OblrnCxvGmieIeaQt1%2F1761186917281.png?alt=media&token=688fd0fb-5f52-4e34-a66d-2a40996ca9db' from origin 'https://80f5cea1-5381-4705-ba5f-0af67b48ccda-00-1tijjywotzc6o.picard.replit.dev' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+HistoryPage.tsx:126  GET https://firebasestorage.googleapis.com/v0/b/ai-group-diet-tracker.firebasestorage.app/o/generated%2F2OUxlq4wk1OblrnCxvGmieIeaQt1%2F1761186917281.png?alt=media&token=688fd0fb-5f52-4e34-a66d-2a40996ca9db net::ERR_FAILED 304 (Not Modified)
+generateInstagramCaption @ HistoryPage.tsx:126
+onClick @ HistoryPage.tsx:278
+executeDispatch @ react-dom_client.js?v=16207891:13622
+runWithFiberInDEV @ react-dom_client.js?v=16207891:997
+processDispatchQueue @ react-dom_client.js?v=16207891:13658
+(anonymous) @ react-dom_client.js?v=16207891:14071
+batchedUpdates$1 @ react-dom_client.js?v=16207891:2626
+dispatchEventForPluginEventSystem @ react-dom_client.js?v=16207891:13763
+dispatchEvent @ react-dom_client.js?v=16207891:16784
+dispatchDiscreteEvent @ react-dom_client.js?v=16207891:16765
+<button>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=16207891:247
+(anonymous) @ HistoryPage.tsx:277
+HistoryPage @ HistoryPage.tsx:263
+react_stack_bottom_frame @ react-dom_client.js?v=16207891:18509
+renderWithHooksAgain @ react-dom_client.js?v=16207891:5729
+renderWithHooks @ react-dom_client.js?v=16207891:5665
+updateFunctionComponent @ react-dom_client.js?v=16207891:7475
+beginWork @ react-dom_client.js?v=16207891:8525
+runWithFiberInDEV @ react-dom_client.js?v=16207891:997
+performUnitOfWork @ react-dom_client.js?v=16207891:12561
+workLoopSync @ react-dom_client.js?v=16207891:12424
+renderRootSync @ react-dom_client.js?v=16207891:12408
+performWorkOnRoot @ react-dom_client.js?v=16207891:11766
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=16207891:13505
+performWorkUntilDeadline @ react-dom_client.js?v=16207891:36
+<HistoryPage>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=16207891:247
+App @ App.tsx:222
+react_stack_bottom_frame @ react-dom_client.js?v=16207891:18509
+renderWithHooksAgain @ react-dom_client.js?v=16207891:5729
+renderWithHooks @ react-dom_client.js?v=16207891:5665
+updateFunctionComponent @ react-dom_client.js?v=16207891:7475
+beginWork @ react-dom_client.js?v=16207891:8525
+runWithFiberInDEV @ react-dom_client.js?v=16207891:997
+performUnitOfWork @ react-dom_client.js?v=16207891:12561
+workLoopSync @ react-dom_client.js?v=16207891:12424
+renderRootSync @ react-dom_client.js?v=16207891:12408
+performWorkOnRoot @ react-dom_client.js?v=16207891:11766
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=16207891:13505
+performWorkUntilDeadline @ react-dom_client.js?v=16207891:36
+<App>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=16207891:247
+(anonymous) @ index.tsx:15Understand this error
+HistoryPage.tsx:183 Error generating caption: TypeError: Failed to fetch
+    at generateInstagramCaption (HistoryPage.tsx:126:30)
+    at onClick (HistoryPage.tsx:278:36)
+    at executeDispatch (react-dom_client.js?v=16207891:13622:11)
+    at runWithFiberInDEV (react-dom_client.js?v=16207891:997:72)
+    at processDispatchQueue (react-dom_client.js?v=16207891:13658:37)
+    at react-dom_client.js?v=16207891:14071:11
+    at batchedUpdates$1 (react-dom_client.js?v=16207891:2626:42)
+    at dispatchEventForPluginEventSystem (react-dom_client.js?v=16207891:13763:9)
+    at dispatchEvent (react-dom_client.js?v=16207891:16784:13)
+    at dispatchDiscreteEvent (react-dom_client.js?v=16207891:16765:62)
+generateInstagramCaption @ HistoryPage.tsx:183
+await in generateInstagramCaption
+onClick @ HistoryPage.tsx:278
+executeDispatch @ react-dom_client.js?v=16207891:13622
+runWithFiberInDEV @ react-dom_client.js?v=16207891:997
+processDispatchQueue @ react-dom_client.js?v=16207891:13658
+(anonymous) @ react-dom_client.js?v=16207891:14071
+batchedUpdates$1 @ react-dom_client.js?v=16207891:2626
+dispatchEventForPluginEventSystem @ react-dom_client.js?v=16207891:13763
+dispatchEvent @ react-dom_client.js?v=16207891:16784
+dispatchDiscreteEvent @ react-dom_client.js?v=16207891:16765
+<button>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=16207891:247
+(anonymous) @ HistoryPage.tsx:277
+HistoryPage @ HistoryPage.tsx:263
+react_stack_bottom_frame @ react-dom_client.js?v=16207891:18509
+renderWithHooksAgain @ react-dom_client.js?v=16207891:5729
+renderWithHooks @ react-dom_client.js?v=16207891:5665
+updateFunctionComponent @ react-dom_client.js?v=16207891:7475
+beginWork @ react-dom_client.js?v=16207891:8525
+runWithFiberInDEV @ react-dom_client.js?v=16207891:997
+performUnitOfWork @ react-dom_client.js?v=16207891:12561
+workLoopSync @ react-dom_client.js?v=16207891:12424
+renderRootSync @ react-dom_client.js?v=16207891:12408
+performWorkOnRoot @ react-dom_client.js?v=16207891:11766
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=16207891:13505
+performWorkUntilDeadline @ react-dom_client.js?v=16207891:36
+<HistoryPage>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=16207891:247
+App @ App.tsx:222
+react_stack_bottom_frame @ react-dom_client.js?v=16207891:18509
+renderWithHooksAgain @ react-dom_client.js?v=16207891:5729
+renderWithHooks @ react-dom_client.js?v=16207891:5665
+updateFunctionComponent @ react-dom_client.js?v=16207891:7475
+beginWork @ react-dom_client.js?v=16207891:8525
+runWithFiberInDEV @ react-dom_client.js?v=16207891:997
+performUnitOfWork @ react-dom_client.js?v=16207891:12561
+workLoopSync @ react-dom_client.js?v=16207891:12424
+renderRootSync @ react-dom_client.js?v=16207891:12408
+performWorkOnRoot @ react-dom_client.js?v=16207891:11766
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=16207891:13505
+performWorkUntilDeadline @ react-dom_client.js?v=16207891:36
+<App>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=16207891:247
+(anonymous) @ index.tsx:15Understand this error

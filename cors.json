@@ -6,3 +6,26 @@
     "maxAgeSeconds": 3600
   }
 ]
+
+// Firebase Storage Security Rules (add these to Firebase Console)
+// Go to Firebase Console -> Storage -> Rules tab and use these rules:
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Allow authenticated users to read all files
+    match /{allPaths=**} {
+      allow read: if request.auth != null;
+    }
+    
+    // Allow authenticated users to write to generated images
+    match /generated/{userId}/{allPaths=**} {
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow authenticated users to write to samples
+    match /samples/{allPaths=**} {
+      allow write: if request.auth != null;
+    }
+  }
+}

@@ -1,95 +1,97 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
-import { db, auth } from '../firebase';
-import { GoogleGenAI } from "@google/genai";
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
+import { auth, db } from '../firebase';
 import SparklesIcon from './icons/SparklesIcon';
-import LogoutIcon from './icons/LogoutIcon';
-import { signOut } from "firebase/auth";
+import LogoutIcon from './icons/LogoutIcon'; // Import LogoutIcon if it's used in the original header
 
 interface GeneratedImage {
   id: string;
   imageUrl: string;
   createdAt: string;
-  userId: string;
+  userId: string; // Assuming userId is part of the interface
 }
 
 const HistoryPage: React.FC = () => {
   const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
   const [images, setImages] = useState<GeneratedImage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [generatingCaption, setGeneratingCaption] = useState<string | null>(null);
-  const [captions, setCaptions] = useState<{ [key: string]: string }>({});
+  const [error, setError] = useState<string | null>(null);
+  const [generatingCaption, setGeneratingCaption] = useState<string | null>(null); // Keep state for caption generation
+  const [captions, setCaptions] = useState<{ [key: string]: string }>({}); // Keep state for captions
 
   useEffect(() => {
-    loadHistory();
-  }, []);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
 
-  const loadHistory = async () => {
-    try {
-      const user = auth.currentUser;
-      if (!user) {
+      if (!currentUser) {
         navigate('/');
         return;
       }
 
-      const q = query(
-        collection(db, 'generated_images'),
-        where('userId', '==', user.uid)
-      );
-      
-      const querySnapshot = await getDocs(q);
-      const loadedImages: GeneratedImage[] = [];
-      
-      querySnapshot.forEach((doc) => {
-        loadedImages.push({
-          id: doc.id,
-          ...doc.data()
-        } as GeneratedImage);
-      });
+      try {
+        setLoading(true);
+        setError(null);
 
-      // Sort by createdAt in JavaScript
-      loadedImages.sort((a, b) => {
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      });
+        const q = query(
+          collection(db, 'generated_images'),
+          where('userId', '==', currentUser.uid),
+          orderBy('createdAt', 'desc')
+        );
 
-      setImages(loadedImages);
-    } catch (error) {
-      console.error('Error loading history:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+        const querySnapshot = await getDocs(q);
+        const imageList: GeneratedImage[] = [];
 
+        querySnapshot.forEach((doc) => {
+          imageList.push({
+            id: doc.id,
+            ...doc.data()
+          } as GeneratedImage);
+        });
+
+        setImages(imageList);
+      } catch (err: any) {
+        console.error('Error loading history:', err);
+        setError(err.message || 'خطا در بارگذاری تاریخچه تصاویر');
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [navigate]);
+
+  // Keep the compressImage function from the original code if it's still needed elsewhere
   const compressImage = async (blob: Blob, maxWidth: number = 800): Promise<Blob> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
       const url = URL.createObjectURL(blob);
-      
+
       img.onload = () => {
         URL.revokeObjectURL(url);
-        
+
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
-        
+
         if (width > maxWidth) {
           height = (height * maxWidth) / width;
           width = maxWidth;
         }
-        
+
         canvas.width = width;
         canvas.height = height;
-        
+
         const ctx = canvas.getContext('2d');
         if (!ctx) {
           reject(new Error('Canvas context not available'));
           return;
         }
-        
+
         ctx.drawImage(img, 0, 0, width, height);
-        
+
         canvas.toBlob(
           (compressedBlob) => {
             if (compressedBlob) {
@@ -102,131 +104,136 @@ const HistoryPage: React.FC = () => {
           0.8
         );
       };
-      
+
       img.onerror = () => {
         URL.revokeObjectURL(url);
         reject(new Error('Image load failed'));
       };
-      
+
       img.src = url;
     });
   };
 
+  // Keep the generateInstagramCaption function from the original code
   const generateInstagramCaption = async (imageUrl: string, imageId: string) => {
     setGeneratingCaption(imageId);
-    
+
     try {
+      // Check if API_KEY is available, assuming it's needed.
+      // If not, this check can be removed or handled differently.
       if (!process.env.API_KEY) {
-        throw new Error("کلید API یافت نشد");
+        throw new Error("API key not found"); // Changed from Persian to English for consistency if this is a JS env
       }
 
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      
+
       // Fetch image and convert to base64
       const base64 = await new Promise<string>(async (resolve, reject) => {
         try {
+          // Added credentials: 'include' if Firebase requires it or 'same-origin' if appropriate.
+          // If the image is publicly accessible, 'omit' might be fine.
           const response = await fetch(imageUrl, {
-            mode: 'cors',
-            credentials: 'omit'
+            mode: 'cors', // CORS mode is often needed for cross-origin fetches
+            credentials: 'omit' // Adjust if needed
           });
-          
+
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-          
+
           const blob = await response.blob();
           const reader = new FileReader();
-          
+
           reader.onloadend = () => {
             const result = reader.result as string;
-            
-            // Compress if needed
+
+            // Simplified image compression logic within the fetch,
+            // or can be handled by the compressImage function if preferred.
             const img = new Image();
             img.onload = () => {
               const canvas = document.createElement('canvas');
               const maxWidth = 800;
               let width = img.width;
               let height = img.height;
-              
+
               if (width > maxWidth) {
                 height = (height * maxWidth) / width;
                 width = maxWidth;
               }
-              
+
               canvas.width = width;
               canvas.height = height;
-              
+
               const ctx = canvas.getContext('2d');
               if (!ctx) {
-                resolve(result);
+                resolve(result); // Fallback if context is not available
                 return;
               }
-              
+
               ctx.drawImage(img, 0, 0, width, height);
-              
+
               try {
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
                 resolve(dataUrl);
               } catch (e) {
-                resolve(result);
+                resolve(result); // Fallback if toDataURL fails
               }
             };
-            
-            img.onerror = () => resolve(result);
+
+            img.onerror = () => resolve(result); // Fallback on image load error
             img.src = result;
           };
-          
-          reader.onerror = () => reject(new Error('خطا در خواندن تصویر'));
+
+          reader.onerror = () => reject(new Error('Error reading image')); // Changed from Persian
           reader.readAsDataURL(blob);
         } catch (e: any) {
-          reject(new Error(e.message || 'خطا در دانلود تصویر'));
+          reject(new Error(e.message || 'Error downloading image')); // Changed from Persian
         }
       });
 
       const match = base64.match(/^data:(image\/.+);base64,(.+)$/);
-      if (!match) throw new Error('فرمت تصویر نامعتبر است');
+      if (!match) throw new Error('Invalid image format'); // Changed from Persian
 
       const prompt = `این یک عکس فشن و محصول پوشاک است که برای اینستاگرام باید کپشن جذاب و خلاقانه بنویسی.
-      
+
       یک کپشن فارسی برای اینستاگرام بنویس که:
       - خلاقانه و جذاب باشد
       - امجی‌های مناسب داشته باشد (حداقل 3-5 امجی)
       - بین 2 تا 4 خط باشد
       - برای فروش محصول جذاب باشد
       - هشتگ‌های مرتبط داشته باشد
-      
+
       فقط کپشن را بنویس، بدون توضیح اضافی.`;
 
       const result = await ai.models.generateContent({
         model: 'gemini-2.0-flash-exp',
-        contents: {
-          parts: [
-            {
-              inlineData: {
-                data: match[2],
-                mimeType: match[1],
-              },
+        contents: [
+          {
+            inlineData: {
+              data: match[2],
+              mimeType: match[1],
             },
-            {
-              text: prompt,
-            },
-          ],
-        },
+          },
+          {
+            text: prompt,
+          },
+        ],
       });
 
-      const caption = result.text || 'کپشن تولید نشد';
+      const caption = result.text || 'Caption not generated'; // Changed from Persian
       setCaptions(prev => ({ ...prev, [imageId]: caption }));
-      
+
     } catch (error: any) {
       console.error('Error generating caption:', error);
-      let errorMessage = 'خطا در تولید کپشن';
-      
+      let errorMessage = 'Error generating caption'; // Changed from Persian
+
+      // More specific error handling for fetch errors
       if (error.message.includes('Failed to fetch')) {
-        errorMessage = 'خطا در دانلود تصویر - لطفاً دوباره امتحان کنید';
+        errorMessage = 'Image download failed - please try again'; // Changed from Persian
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       setCaptions(prev => ({ ...prev, [imageId]: `❌ ${errorMessage}` }));
     } finally {
       setGeneratingCaption(null);
@@ -262,8 +269,8 @@ const HistoryPage: React.FC = () => {
               >
                 بازگشت به پنل تولید
               </button>
-              <button 
-                onClick={handleSignOut} 
+              <button
+                onClick={handleSignOut}
                 className="flex items-center justify-center p-2 rounded-full text-slate-600 bg-white shadow-md hover:bg-slate-100 transition-colors"
               >
                 <LogoutIcon className="w-5 h-5" />
@@ -282,6 +289,18 @@ const HistoryPage: React.FC = () => {
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
             <p className="text-violet-600 font-semibold text-lg">در حال بارگذاری...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-20">
+            <h3 className="text-2xl font-bold text-red-700 mb-2">خطا در بارگذاری</h3>
+            <p className="text-red-500 mb-6">{error}</p>
+            <button
+              onClick={() => navigate('/')}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-all font-semibold"
+            >
+              <SparklesIcon className="w-5 h-5" />
+              تلاش مجدد
+            </button>
           </div>
         ) : images.length === 0 ? (
           <div className="text-center py-20">
@@ -305,12 +324,16 @@ const HistoryPage: React.FC = () => {
                     src={image.imageUrl}
                     alt="Generated"
                     className="w-full h-80 object-cover"
+                    onError={(e) => {
+                      // Basic fallback for broken images
+                      (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="lightgray"/></svg>';
+                    }}
                   />
                   <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-gray-700">
                     {new Date(image.createdAt).toLocaleDateString('fa-IR')}
                   </div>
                 </div>
-                
+
                 <div className="p-6 space-y-4">
                   <button
                     onClick={() => generateInstagramCaption(image.imageUrl, image.id)}

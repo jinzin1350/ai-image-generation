@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
-import { auth, db } from './firebase';
+import { auth, db, storage } from './firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
 import { CATEGORIZED_MODELS, ALL_MODELS, BACKGROUNDS } from './constants';
@@ -63,10 +63,20 @@ function MainApp({ user }: { user: User }) {
       const resultImage = await generateFashionImage(uploadedImage, modelImageBase64, selectedBackground);
       setGeneratedImage(resultImage);
 
-      // Save to Firestore
+      // Upload to Firebase Storage
+      const { ref, uploadString, getDownloadURL } = await import('firebase/storage');
+      const storageRef = ref(storage, `generated/${user.uid}/${Date.now()}.png`);
+      
+      // Upload base64 image
+      await uploadString(storageRef, resultImage, 'data_url');
+      
+      // Get download URL
+      const downloadURL = await getDownloadURL(storageRef);
+
+      // Save URL to Firestore
       await addDoc(collection(db, 'generated_images'), {
         userId: user.uid,
-        imageUrl: resultImage,
+        imageUrl: downloadURL,
         createdAt: new Date().toISOString(),
       });
     } catch (e: any) {

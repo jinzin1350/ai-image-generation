@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { onAuthStateChanged, User, signOut } from 'firebase/auth';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { auth, db } from '../firebase';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import SparklesIcon from './icons/SparklesIcon';
-import LogoutIcon from './icons/LogoutIcon'; // Import LogoutIcon if it's used in the original header
+import LogoutIcon from './icons/LogoutIcon';
 
 interface GeneratedImage {
   id: string;
@@ -119,13 +120,12 @@ const HistoryPage: React.FC = () => {
     setGeneratingCaption(imageId);
 
     try {
-      // Check if API_KEY is available, assuming it's needed.
-      // If not, this check can be removed or handled differently.
-      if (!process.env.API_KEY) {
-        throw new Error("API key not found"); // Changed from Persian to English for consistency if this is a JS env
+      // Check if API_KEY is available
+      if (!process.env.GEMINI_API_KEY) {
+        throw new Error("API key not found");
       }
 
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
       // Fetch image and convert to base64
       const base64 = await new Promise<string>(async (resolve, reject) => {
@@ -205,22 +205,20 @@ const HistoryPage: React.FC = () => {
 
       فقط کپشن را بنویس، بدون توضیح اضافی.`;
 
-      const result = await ai.models.generateContent({
-        model: 'gemini-2.0-flash-exp',
-        contents: [
-          {
-            inlineData: {
-              data: match[2],
-              mimeType: match[1],
-            },
+      const model = ai.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+      
+      const result = await model.generateContent([
+        {
+          inlineData: {
+            data: match[2],
+            mimeType: match[1],
           },
-          {
-            text: prompt,
-          },
-        ],
-      });
+        },
+        prompt,
+      ]);
 
-      const caption = result.text || 'Caption not generated'; // Changed from Persian
+      const response = await result.response;
+      const caption = response.text() || 'Caption not generated';
       setCaptions(prev => ({ ...prev, [imageId]: caption }));
 
     } catch (error: any) {

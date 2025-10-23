@@ -122,43 +122,65 @@ const HistoryPage: React.FC = () => {
 
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       
-      // Use canvas to load image and convert to base64 (avoids CORS)
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = 'anonymous'; // Try to enable CORS
-        
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const maxWidth = 800;
-          let width = img.width;
-          let height = img.height;
+      // Fetch image and convert to base64
+      const base64 = await new Promise<string>(async (resolve, reject) => {
+        try {
+          const response = await fetch(imageUrl, {
+            mode: 'cors',
+            credentials: 'omit'
+          });
           
-          if (width > maxWidth) {
-            height = (height * maxWidth) / width;
-            width = maxWidth;
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
           }
           
-          canvas.width = width;
-          canvas.height = height;
+          const blob = await response.blob();
+          const reader = new FileReader();
           
-          const ctx = canvas.getContext('2d');
-          if (!ctx) {
-            reject(new Error('Canvas context not available'));
-            return;
-          }
+          reader.onloadend = () => {
+            const result = reader.result as string;
+            
+            // Compress if needed
+            const img = new Image();
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              const maxWidth = 800;
+              let width = img.width;
+              let height = img.height;
+              
+              if (width > maxWidth) {
+                height = (height * maxWidth) / width;
+                width = maxWidth;
+              }
+              
+              canvas.width = width;
+              canvas.height = height;
+              
+              const ctx = canvas.getContext('2d');
+              if (!ctx) {
+                resolve(result);
+                return;
+              }
+              
+              ctx.drawImage(img, 0, 0, width, height);
+              
+              try {
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                resolve(dataUrl);
+              } catch (e) {
+                resolve(result);
+              }
+            };
+            
+            img.onerror = () => resolve(result);
+            img.src = result;
+          };
           
-          ctx.drawImage(img, 0, 0, width, height);
-          
-          try {
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-            resolve(dataUrl);
-          } catch (e) {
-            reject(new Error('تبدیل تصویر با خطا مواجه شد - ممکن است مشکل CORS باشد'));
-          }
-        };
-        
-        img.onerror = () => reject(new Error('بارگذاری تصویر با خطا مواجه شد'));
-        img.src = imageUrl;
+          reader.onerror = () => reject(new Error('خطا در خواندن تصویر'));
+          reader.readAsDataURL(blob);
+        } catch (e: any) {
+          reject(new Error(e.message || 'خطا در دانلود تصویر'));
+        }
       });
 
       const match = base64.match(/^data:(image\/.+);base64,(.+)$/);

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import SparklesIcon from './icons/SparklesIcon';
 import LogoutIcon from './icons/LogoutIcon';
 import type { User } from '@supabase/supabase-js';
@@ -68,11 +68,13 @@ const HistoryPage: React.FC = () => {
     setGeneratingCaption(imageId);
 
     try {
-      if (!process.env.GEMINI_API_KEY) {
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      
+      if (!apiKey) {
         throw new Error("API key not found");
       }
 
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const ai = new GoogleGenerativeAI(apiKey);
 
       const base64 = await new Promise<string>(async (resolve, reject) => {
         try {

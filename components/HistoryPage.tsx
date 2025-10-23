@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { onAuthStateChanged, User, signOut } from 'firebase/auth';
-import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { supabase } from '../supabase';
 import { GoogleGenAI } from '@google/genai';
 import SparklesIcon from './icons/SparklesIcon';
 import LogoutIcon from './icons/LogoutIcon';
+import type { User } from '@supabase/supabase-js';
 
 interface GeneratedImage {
   id: string;
-  imageUrl: string;
-  createdAt: string;
-  userId: string; // Assuming userId is part of the interface
+  image_url: string;
+  created_at: string;
+  user_id: string;
 }
 
 const HistoryPage: React.FC = () => {
@@ -20,11 +19,12 @@ const HistoryPage: React.FC = () => {
   const [images, setImages] = useState<GeneratedImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [generatingCaption, setGeneratingCaption] = useState<string | null>(null); // Keep state for caption generation
-  const [captions, setCaptions] = useState<{ [key: string]: string }>({}); // Keep state for captions
+  const [generatingCaption, setGeneratingCaption] = useState<string | null>(null);
+  const [captions, setCaptions] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    const fetchUser = async () => {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
       setUser(currentUser);
 
       if (!currentUser) {
@@ -36,107 +36,49 @@ const HistoryPage: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        const q = query(
-          collection(db, 'generated_images'),
-          where('userId', '==', currentUser.uid)
-        );
+        const { data: imageData, error: fetchError } = await supabase
+          .from('generated_images')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false });
 
-        const querySnapshot = await getDocs(q);
-        const imageList: GeneratedImage[] = [];
+        if (fetchError) throw fetchError;
 
-        querySnapshot.forEach((doc) => {
-          imageList.push({
-            id: doc.id,
-            ...doc.data()
-          } as GeneratedImage);
-        });
-
-        // Sort by createdAt in memory
-        imageList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-        setImages(imageList);
+        setImages(imageData || []);
       } catch (err: any) {
         console.error('Error loading history:', err);
         setError(err.message || 'خطا در بارگذاری تاریخچه تصاویر');
       } finally {
         setLoading(false);
       }
+    };
+
+    fetchUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session?.user) {
+        navigate('/');
+      }
     });
 
-    return () => unsubscribe();
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
-  // Keep the compressImage function from the original code if it's still needed elsewhere
-  const compressImage = async (blob: Blob, maxWidth: number = 800): Promise<Blob> => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      const url = URL.createObjectURL(blob);
-
-      img.onload = () => {
-        URL.revokeObjectURL(url);
-
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-
-        if (width > maxWidth) {
-          height = (height * maxWidth) / width;
-          width = maxWidth;
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          reject(new Error('Canvas context not available'));
-          return;
-        }
-
-        ctx.drawImage(img, 0, 0, width, height);
-
-        canvas.toBlob(
-          (compressedBlob) => {
-            if (compressedBlob) {
-              resolve(compressedBlob);
-            } else {
-              reject(new Error('Compression failed'));
-            }
-          },
-          'image/jpeg',
-          0.8
-        );
-      };
-
-      img.onerror = () => {
-        URL.revokeObjectURL(url);
-        reject(new Error('Image load failed'));
-      };
-
-      img.src = url;
-    });
-  };
-
-  // Keep the generateInstagramCaption function from the original code
   const generateInstagramCaption = async (imageUrl: string, imageId: string) => {
     setGeneratingCaption(imageId);
 
     try {
-      // Check if API_KEY is available
       if (!process.env.GEMINI_API_KEY) {
         throw new Error("API key not found");
       }
 
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-      // Fetch image and convert to base64
       const base64 = await new Promise<string>(async (resolve, reject) => {
         try {
-          // Added credentials: 'include' if Firebase requires it or 'same-origin' if appropriate.
-          // If the image is publicly accessible, 'omit' might be fine.
           const response = await fetch(imageUrl, {
-            mode: 'cors', // CORS mode is often needed for cross-origin fetches
-            credentials: 'omit' // Adjust if needed
+            mode: 'cors',
+            credentials: 'omit'
           });
 
           if (!response.ok) {
@@ -148,10 +90,8 @@ const HistoryPage: React.FC = () => {
 
           reader.onloadend = () => {
             const result = reader.result as string;
-
-            // Simplified image compression logic within the fetch,
-            // or can be handled by the compressImage function if preferred.
             const img = new Image();
+
             img.onload = () => {
               const canvas = document.createElement('canvas');
               const maxWidth = 800;
@@ -168,7 +108,7 @@ const HistoryPage: React.FC = () => {
 
               const ctx = canvas.getContext('2d');
               if (!ctx) {
-                resolve(result); // Fallback if context is not available
+                resolve(result);
                 return;
               }
 
@@ -178,23 +118,23 @@ const HistoryPage: React.FC = () => {
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
                 resolve(dataUrl);
               } catch (e) {
-                resolve(result); // Fallback if toDataURL fails
+                resolve(result);
               }
             };
 
-            img.onerror = () => resolve(result); // Fallback on image load error
+            img.onerror = () => resolve(result);
             img.src = result;
           };
 
-          reader.onerror = () => reject(new Error('Error reading image')); // Changed from Persian
+          reader.onerror = () => reject(new Error('Error reading image'));
           reader.readAsDataURL(blob);
         } catch (e: any) {
-          reject(new Error(e.message || 'Error downloading image')); // Changed from Persian
+          reject(new Error(e.message || 'Error downloading image'));
         }
       });
 
       const match = base64.match(/^data:(image\/.+);base64,(.+)$/);
-      if (!match) throw new Error('Invalid image format'); // Changed from Persian
+      if (!match) throw new Error('Invalid image format');
 
       const prompt = `این یک عکس فشن و محصول پوشاک است که برای اینستاگرام باید کپشن جذاب و خلاقانه بنویسی.
 
@@ -225,11 +165,10 @@ const HistoryPage: React.FC = () => {
 
     } catch (error: any) {
       console.error('Error generating caption:', error);
-      let errorMessage = 'Error generating caption'; // Changed from Persian
+      let errorMessage = 'Error generating caption';
 
-      // More specific error handling for fetch errors
       if (error.message.includes('Failed to fetch')) {
-        errorMessage = 'Image download failed - please try again'; // Changed from Persian
+        errorMessage = 'Image download failed - please try again';
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -240,8 +179,8 @@ const HistoryPage: React.FC = () => {
     }
   };
 
-  const handleSignOut = () => {
-    signOut(auth).catch((error) => console.error("Sign out error", error));
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
   };
 
   const copyToClipboard = (text: string) => {
@@ -250,7 +189,6 @@ const HistoryPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50" dir="rtl">
-      {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
           <div className="flex justify-between items-center">
@@ -280,7 +218,6 @@ const HistoryPage: React.FC = () => {
         </div>
       </header>
 
-      {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {loading ? (
           <div className="text-center py-20">
@@ -321,22 +258,21 @@ const HistoryPage: React.FC = () => {
               <div key={image.id} className="bg-white rounded-2xl shadow-lg overflow-hidden">
                 <div className="relative">
                   <img
-                    src={image.imageUrl}
+                    src={image.image_url}
                     alt="Generated"
                     className="w-full h-80 object-cover"
                     onError={(e) => {
-                      // Basic fallback for broken images
                       (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="lightgray"/></svg>';
                     }}
                   />
                   <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-gray-700">
-                    {new Date(image.createdAt).toLocaleDateString('fa-IR')}
+                    {new Date(image.created_at).toLocaleDateString('fa-IR')}
                   </div>
                 </div>
 
                 <div className="p-6 space-y-4">
                   <button
-                    onClick={() => generateInstagramCaption(image.imageUrl, image.id)}
+                    onClick={() => generateInstagramCaption(image.image_url, image.id)}
                     disabled={generatingCaption === image.id}
                     className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-l from-violet-600 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-violet-500/50 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                   >

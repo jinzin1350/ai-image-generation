@@ -81,9 +81,9 @@ function MainApp({ user }: { user: User }) {
       // Convert base64 to blob
       const base64Response = await fetch(resultImage);
       const blob = await base64Response.blob();
-      
+
       const fileName = `${user.id}/${Date.now()}.png`;
-      
+
       // Upload to Supabase Storage
       const { error: uploadError } = await supabase.storage
         .from('generated')
@@ -183,7 +183,7 @@ function MainApp({ user }: { user: User }) {
               selectedId={selectedBackgroundId} 
               onSelect={setSelectedBackgroundId} 
             />
-            
+
             <div className="space-y-4">
               <h3 className="text-lg font-bold text-slate-800">4. Product & Photo Details</h3>
               <div className="grid grid-cols-2 gap-4">
@@ -205,7 +205,7 @@ function MainApp({ user }: { user: User }) {
                     <option value="Accessories">Accessories</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Color</label>
                   <input 
@@ -216,7 +216,7 @@ function MainApp({ user }: { user: User }) {
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Style</label>
                   <select 
@@ -232,7 +232,7 @@ function MainApp({ user }: { user: User }) {
                     <option value="Streetwear">Streetwear</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Model Pose</label>
                   <select 

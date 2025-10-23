@@ -13,36 +13,24 @@ const Auth: React.FC = () => {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    
+
     try {
       if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) throw error;
       } else {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+        if (error) throw error;
       }
     } catch (err: any) {
-        console.error("Authentication Error:", err.code, err.message);
-        // Provide user-friendly error messages
-        switch (err.code) {
-            case 'auth/user-not-found':
-            case 'auth/wrong-password':
-                setError('Invalid email or password.');
-                break;
-            case 'auth/email-already-in-use':
-                setError('An account with this email already exists.');
-                break;
-            case 'auth/weak-password':
-                setError('Password should be at least 6 characters.');
-                break;
-            case 'auth/invalid-email':
-                setError('Please enter a valid email address.');
-                break;
-            case 'auth/operation-not-allowed':
-                setError('Sign up is currently disabled. Please contact support.');
-                break;
-            default:
-                setError('An unexpected error occurred. Please try again.');
-        }
+        console.error("Authentication Error:", err.message);
+        setError(err.message || 'An unexpected error occurred. Please try again.');
     } finally {
         setLoading(false);
     }
@@ -96,7 +84,7 @@ const Auth: React.FC = () => {
                 </div>
 
                 {error && <p className="text-red-500 text-xs italic mb-4 text-center">{error}</p>}
-                
+
                 <div className="flex items-center justify-between">
                     <button
                         className="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-slate-400 disabled:cursor-not-allowed transition-all duration-300"

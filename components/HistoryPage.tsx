@@ -36,8 +36,7 @@ const HistoryPage: React.FC = () => {
 
       const q = query(
         collection(db, 'generated_images'),
-        where('userId', '==', user.uid),
-        orderBy('createdAt', 'desc')
+        where('userId', '==', user.uid)
       );
       
       const querySnapshot = await getDocs(q);
@@ -48,6 +47,11 @@ const HistoryPage: React.FC = () => {
           id: doc.id,
           ...doc.data()
         } as GeneratedImage);
+      });
+
+      // Sort by createdAt in JavaScript
+      loadedImages.sort((a, b) => {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
 
       setImages(loadedImages);

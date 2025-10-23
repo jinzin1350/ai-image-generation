@@ -77,9 +77,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             <div className="relative">
               <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl float-animation">
                 <img
-                  src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&h=1000&fit=crop"
+                  src="https://picsum.photos/800/1000"
                   alt="Fashion Model"
                   className="w-full h-auto object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='1000'%3E%3Crect fill='%236366f1' width='800' height='1000'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='48'%3EModel Photo%3C/text%3E%3C/svg%3E";
+                  }}
                 />
               </div>
               <div className="absolute -top-10 -right-10 w-72 h-72 bg-violet-200 rounded-full blur-3xl opacity-50"></div>
@@ -101,27 +104,27 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             {[
               {
                 name: 'زنانه',
-                image: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=500&fit=crop',
+                image: 'https://picsum.photos/seed/women/400/500',
                 color: 'from-pink-500 to-rose-500'
               },
               {
                 name: 'مردانه',
-                image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=500&fit=crop',
+                image: 'https://picsum.photos/seed/men/400/500',
                 color: 'from-blue-500 to-indigo-500'
               },
               {
                 name: 'دخترانه',
-                image: 'https://images.unsplash.com/photo-1518632945996-6cb9e69ef14c?w=400&h=500&fit=crop',
+                image: 'https://picsum.photos/seed/girls/400/500',
                 color: 'from-purple-500 to-pink-500'
               },
               {
                 name: 'پسرانه',
-                image: 'https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?w=400&h=500&fit=crop',
+                image: 'https://picsum.photos/seed/boys/400/500',
                 color: 'from-green-500 to-emerald-500'
               },
               {
                 name: 'نوزادی',
-                image: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&h=500&fit=crop',
+                image: 'https://picsum.photos/seed/baby/400/500',
                 color: 'from-yellow-500 to-orange-500'
               }
             ].map((category) => (

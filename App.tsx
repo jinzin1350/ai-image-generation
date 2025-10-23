@@ -36,6 +36,9 @@ const imageUrlToBase64 = async (url: string): Promise<string> => {
 function MainApp({ user }: { user: User }) {
   const navigate = useNavigate();
 
+  // TEST: Check if new code is loaded
+  console.log("🔥 NEW CODE LOADED - VERSION 2024-10-23 v3 - COLLAPSIBLE SECTIONS");
+
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
   const [selectedBackgroundId, setSelectedBackgroundId] = useState<string | null>(null);

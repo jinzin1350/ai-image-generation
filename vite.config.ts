@@ -24,6 +24,7 @@ export default defineConfig(({ mode }) => {
           '.repl.co',
           'localhost',
           'iranretailai.replit.app',
+          'iranretailai.com',
         ],
       },
       plugins: [react()],

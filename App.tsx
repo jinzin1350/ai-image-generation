@@ -169,6 +169,7 @@ function MainApp({ user }: { user: User }) {
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [showLanding, setShowLanding] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -192,13 +193,23 @@ function App() {
     );
   }
 
+  const HomeElement = () => {
+    if (user) {
+      return <MainApp user={user} />;
+    }
+    if (showLanding) {
+      return <LandingPage onGetStarted={() => setShowLanding(false)} />;
+    }
+    return <Auth />;
+  };
+
   return (
     <Router>
       <Routes>
-        <Route path="/" element={user ? <MainApp user={user} /> : <LandingPage />} />
+        <Route path="/" element={<HomeElement />} />
         <Route path="/samples" element={<SamplesPage />} />
         <Route path="/admin" element={<AdminPanel />} />
-        <Route path="/history" element={user ? <HistoryPage /> : <LandingPage />} />
+        <Route path="/history" element={user ? <HistoryPage /> : <LandingPage onGetStarted={() => setShowLanding(false)} />} />
       </Routes>
     </Router>
   );

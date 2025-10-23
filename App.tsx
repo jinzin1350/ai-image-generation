@@ -136,57 +136,67 @@ function MainApp({ user }: { user: User }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 font-sans p-4 sm:p-6 lg:p-8">
-      <main className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 font-sans">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <header className="mb-8">
-            <div className="flex justify-between items-center">
-                <div className="text-center flex-grow">
-                     <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-800 tracking-tight">
+            <div className="flex flex-col gap-4">
+                <div className="flex justify-between items-center">
+                    <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-800 tracking-tight">
                         Fashion AI <span className="text-indigo-600">Photoshoot</span>
                     </h1>
-                    <p className="mt-3 text-lg text-slate-600 max-w-2xl mx-auto">
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => navigate('/history')}
+                            className="px-4 py-2 bg-white text-indigo-600 rounded-lg shadow-sm hover:shadow-md hover:bg-indigo-50 transition-all font-semibold text-sm"
+                        >
+                            تاریخچه من
+                        </button>
+                        <button
+                            onClick={handleSignOut}
+                            className="flex items-center justify-center p-2.5 rounded-lg text-slate-600 bg-white shadow-sm hover:shadow-md hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
+                            aria-label="Sign out"
+                        >
+                           <LogoutIcon className="w-5 h-5" />
+                        </button>
+                    </div>
+                </div>
+                <div className="flex justify-between items-center">
+                    <p className="text-base text-slate-600 max-w-2xl">
                         Create professional product photos in seconds. Upload your clothing item, pick a model and a background, and let AI do the rest.
                     </p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <span className="text-sm text-slate-600 hidden sm:block">{user.email}</span>
-                    <button
-                        onClick={() => navigate('/history')}
-                        className="px-4 py-2 bg-white text-indigo-600 rounded-lg shadow-md hover:bg-indigo-50 transition-colors font-semibold text-sm"
-                    >
-                        تاریخچه من
-                    </button>
-                    <button 
-                        onClick={handleSignOut} 
-                        className="flex items-center justify-center p-2 rounded-full text-slate-600 bg-white shadow-md hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-                        aria-label="Sign out"
-                    >
-                       <LogoutIcon className="w-5 h-5" />
-                    </button>
+                    <span className="text-sm text-slate-500 hidden md:block">{user.email}</span>
                 </div>
             </div>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           {/* Left Panel: Controls */}
-          <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg space-y-8 flex flex-col">
-            <ImageUploader onImageUpload={setUploadedImage} uploadedImage={uploadedImage} />
-            <OptionSelector 
-              title="2. Choose a Model"
-              options={CATEGORIZED_MODELS} 
-              selectedId={selectedModelId} 
-              onSelect={setSelectedModelId} 
-            />
-            <OptionSelector 
-              title="3. Pick a Background"
-              options={BACKGROUNDS} 
-              selectedId={selectedBackgroundId} 
-              onSelect={setSelectedBackgroundId} 
-            />
+          <div className="space-y-6">
+            <div className="bg-white p-6 rounded-xl shadow-md">
+              <ImageUploader onImageUpload={setUploadedImage} uploadedImage={uploadedImage} />
+            </div>
 
-            <div className="space-y-4">
+            <div className="bg-white p-6 rounded-xl shadow-md">
+              <OptionSelector
+                title="2. Choose a Model"
+                options={CATEGORIZED_MODELS}
+                selectedId={selectedModelId}
+                onSelect={setSelectedModelId}
+              />
+            </div>
+
+            <div className="bg-white p-6 rounded-xl shadow-md">
+              <OptionSelector
+                title="3. Pick a Background"
+                options={BACKGROUNDS}
+                selectedId={selectedBackgroundId}
+                onSelect={setSelectedBackgroundId}
+              />
+            </div>
+
+            <div className="bg-white p-6 rounded-xl shadow-md space-y-4">
               <h3 className="text-lg font-bold text-slate-800">4. Product & Photo Details</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Product Type</label>
                   <select 
@@ -281,18 +291,19 @@ function MainApp({ user }: { user: User }) {
                 </div>
               </div>
             </div>
-             <div className="mt-auto pt-8 flex flex-col sm:flex-row gap-4">
-              <button 
+
+            <div className="bg-white p-6 rounded-xl shadow-md flex flex-col sm:flex-row gap-4">
+              <button
                 onClick={handleGenerateClick}
                 disabled={!isReadyToGenerate || isLoading}
-                className="w-full flex-grow inline-flex items-center justify-center px-6 py-4 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-slate-400 disabled:cursor-not-allowed transition-all duration-300"
+                className="flex-1 inline-flex items-center justify-center px-6 py-4 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-slate-400 disabled:cursor-not-allowed transition-all duration-200"
               >
                 <SparklesIcon className="w-5 h-5 mr-2 -ml-1" />
                 {isLoading ? 'Generating...' : 'Generate Photoshoot'}
               </button>
               <button
                 onClick={handleReset}
-                className="w-full sm:w-auto px-6 py-4 border border-slate-300 text-base font-medium rounded-xl text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                className="px-6 py-4 border border-slate-300 text-base font-medium rounded-lg text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
               >
                 Reset
               </button>
@@ -300,8 +311,10 @@ function MainApp({ user }: { user: User }) {
           </div>
 
           {/* Right Panel: Display */}
-          <div className="flex items-center justify-center">
-             <GeneratedImageDisplay image={generatedImage} isLoading={isLoading} error={error} />
+          <div className="lg:sticky lg:top-6 lg:self-start">
+            <div className="bg-white p-6 rounded-xl shadow-md">
+              <GeneratedImageDisplay image={generatedImage} isLoading={isLoading} error={error} />
+            </div>
           </div>
         </div>
       </main>

@@ -122,10 +122,14 @@ const HistoryPage: React.FC = () => {
 
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       
-      // Fetch image
-      const response = await fetch(imageUrl);
+      // Fetch image with proper CORS mode
+      const response = await fetch(imageUrl, {
+        mode: 'cors',
+        credentials: 'omit'
+      });
+      
       if (!response.ok) {
-        throw new Error('دانلود تصویر با خطا مواجه شد');
+        throw new Error(`دانلود تصویر با خطا مواجه شد: ${response.status}`);
       }
       
       const blob = await response.blob();
@@ -177,8 +181,15 @@ const HistoryPage: React.FC = () => {
       
     } catch (error: any) {
       console.error('Error generating caption:', error);
-      const errorMessage = error.message || 'خطا در تولید کپشن';
-      setCaptions(prev => ({ ...prev, [imageId]: errorMessage }));
+      let errorMessage = 'خطا در تولید کپشن';
+      
+      if (error.message.includes('Failed to fetch')) {
+        errorMessage = 'خطا در دانلود تصویر - لطفاً دوباره امتحان کنید';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setCaptions(prev => ({ ...prev, [imageId]: `❌ ${errorMessage}` }));
     } finally {
       setGeneratingCaption(null);
     }

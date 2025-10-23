@@ -1,4 +1,6 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { auth } from './firebase';
 
@@ -9,6 +11,7 @@ import OptionSelector from './components/OptionSelector';
 import GeneratedImageDisplay from './components/GeneratedImageDisplay';
 import Auth from './components/Auth';
 import LandingPage from './components/LandingPage';
+import SamplesPage from './components/SamplesPage';
 import SparklesIcon from './components/icons/SparklesIcon';
 import LogoutIcon from './components/icons/LogoutIcon';
 import type { Option } from './types';
@@ -29,8 +32,8 @@ const imageUrlToBase64 = async (url: string): Promise<string> => {
   });
 };
 
-
-function App() {
+function MainApp() {
+  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [showLanding, setShowLanding] = useState(true);
@@ -111,7 +114,6 @@ function App() {
     return <Auth />;
   }
 
-
   return (
     <div className="min-h-screen bg-slate-100 font-sans p-4 sm:p-6 lg:p-8">
       <main className="max-w-7xl mx-auto">
@@ -179,6 +181,17 @@ function App() {
         </div>
       </main>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<MainApp />} />
+        <Route path="/samples" element={<SamplesPage />} />
+      </Routes>
+    </Router>
   );
 }
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import SparklesIcon from './icons/SparklesIcon';
 
 interface LandingPageProps {
@@ -6,6 +7,8 @@ interface LandingPageProps {
 }
 
 const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-white" dir="rtl">
       {/* Header */}
@@ -63,7 +66,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                   <SparklesIcon className="w-6 h-6 group-hover:rotate-12 transition-transform" />
                   شروع رایگان
                 </button>
-                <button className="px-10 py-5 bg-white text-gray-700 rounded-2xl border-2 border-gray-200 hover:border-violet-300 hover:bg-violet-50 transition-all duration-300 font-bold text-lg">
+                <button 
+                  onClick={() => navigate('/samples')}
+                  className="px-10 py-5 bg-white text-gray-700 rounded-2xl border-2 border-gray-200 hover:border-violet-300 hover:bg-violet-50 transition-all duration-300 font-bold text-lg"
+                >
                   مشاهده نمونه کارها
                 </button>
               </div>

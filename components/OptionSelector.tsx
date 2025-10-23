@@ -39,29 +39,31 @@ const OptionSelector: React.FC<OptionSelectorProps> = ({ title, options, selecte
         </div>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
         {optionsToShow.map((option) => (
           <div
             key={option.id}
             onClick={() => onSelect(option.id)}
-            className={`cursor-pointer rounded-xl overflow-hidden transition-all duration-200 ease-in-out transform hover:scale-105 ${
+            className={`cursor-pointer rounded-lg overflow-hidden transition-all duration-150 ${
               selectedId === option.id
-                ? 'ring-4 ring-indigo-500 shadow-xl'
-                : 'ring-2 ring-slate-200 hover:ring-indigo-300 hover:shadow-lg'
+                ? 'ring-2 ring-indigo-500 shadow-lg scale-105'
+                : 'ring-1 ring-slate-200 hover:ring-indigo-300 hover:shadow-md'
             }`}
           >
             <div className="relative">
-              <img src={option.imageUrl} alt={option.name} className="w-full h-32 sm:h-36 object-cover" />
+              <img src={option.imageUrl} alt={option.name} className="w-full h-16 sm:h-20 object-cover" />
               {selectedId === option.id && (
-                <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm">
-                  ✓
+                <div className="absolute inset-0 bg-indigo-600 bg-opacity-20 flex items-center justify-center">
+                  <div className="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center font-bold text-xs">
+                    ✓
+                  </div>
                 </div>
               )}
             </div>
-            <div className={`p-3 text-center text-sm font-semibold transition-colors ${
+            <div className={`p-1.5 text-center text-xs font-medium transition-colors ${
               selectedId === option.id
-                ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white'
-                : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                ? 'bg-indigo-500 text-white'
+                : 'bg-slate-50 text-slate-700'
             }`}>
               {option.name}
             </div>

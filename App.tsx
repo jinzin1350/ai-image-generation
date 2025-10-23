@@ -42,6 +42,7 @@ function MainApp({ user }: { user: User }) {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [expandedSection, setExpandedSection] = useState<number>(1);
   const [productDetails, setProductDetails] = useState({
     productType: '',
     color: '',
@@ -221,61 +222,92 @@ function MainApp({ user }: { user: User }) {
           <div className="lg:col-span-2 space-y-6">
             {/* Step 1: Upload */}
             <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
-              <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-4">
-                <h3 className="text-white font-bold text-lg flex items-center gap-2">
-                  <span className="bg-white text-indigo-600 w-6 h-6 rounded-full flex items-center justify-center text-sm">1</span>
-                  Upload Your Product
+              <div
+                onClick={() => setExpandedSection(expandedSection === 1 ? 0 : 1)}
+                className="bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-4 cursor-pointer hover:from-indigo-600 hover:to-purple-600 transition-colors"
+              >
+                <h3 className="text-white font-bold text-lg flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <span className="bg-white text-indigo-600 w-6 h-6 rounded-full flex items-center justify-center text-sm">1</span>
+                    Upload Your Product
+                  </span>
+                  <span className="text-2xl">{expandedSection === 1 ? '−' : '+'}</span>
                 </h3>
               </div>
-              <div className="p-6">
-                <ImageUploader onImageUpload={setUploadedImage} uploadedImage={uploadedImage} />
-              </div>
+              {expandedSection === 1 && (
+                <div className="p-6">
+                  <ImageUploader onImageUpload={(img) => { setUploadedImage(img); setExpandedSection(2); }} uploadedImage={uploadedImage} />
+                </div>
+              )}
             </div>
 
             {/* Step 2: Model */}
             <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
-              <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-4">
-                <h3 className="text-white font-bold text-lg flex items-center gap-2">
-                  <span className="bg-white text-indigo-600 w-6 h-6 rounded-full flex items-center justify-center text-sm">2</span>
-                  Choose Your Model
+              <div
+                onClick={() => uploadedImage && setExpandedSection(expandedSection === 2 ? 0 : 2)}
+                className={`bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-4 transition-colors ${uploadedImage ? 'cursor-pointer hover:from-indigo-600 hover:to-purple-600' : 'opacity-60 cursor-not-allowed'}`}
+              >
+                <h3 className="text-white font-bold text-lg flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <span className="bg-white text-indigo-600 w-6 h-6 rounded-full flex items-center justify-center text-sm">2</span>
+                    Choose Your Model
+                  </span>
+                  <span className="text-2xl">{expandedSection === 2 ? '−' : '+'}</span>
                 </h3>
               </div>
-              <div className="p-6">
-                <OptionSelector
-                  title=""
-                  options={CATEGORIZED_MODELS}
-                  selectedId={selectedModelId}
-                  onSelect={setSelectedModelId}
-                />
-              </div>
+              {expandedSection === 2 && uploadedImage && (
+                <div className="p-6">
+                  <OptionSelector
+                    title=""
+                    options={CATEGORIZED_MODELS}
+                    selectedId={selectedModelId}
+                    onSelect={(id) => { setSelectedModelId(id); setExpandedSection(3); }}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Step 3: Background */}
             <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
-              <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-4">
-                <h3 className="text-white font-bold text-lg flex items-center gap-2">
-                  <span className="bg-white text-indigo-600 w-6 h-6 rounded-full flex items-center justify-center text-sm">3</span>
-                  Select Background
+              <div
+                onClick={() => selectedModelId && setExpandedSection(expandedSection === 3 ? 0 : 3)}
+                className={`bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-4 transition-colors ${selectedModelId ? 'cursor-pointer hover:from-indigo-600 hover:to-purple-600' : 'opacity-60 cursor-not-allowed'}`}
+              >
+                <h3 className="text-white font-bold text-lg flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <span className="bg-white text-indigo-600 w-6 h-6 rounded-full flex items-center justify-center text-sm">3</span>
+                    Select Background
+                  </span>
+                  <span className="text-2xl">{expandedSection === 3 ? '−' : '+'}</span>
                 </h3>
               </div>
-              <div className="p-6">
-                <OptionSelector
-                  title=""
-                  options={BACKGROUNDS}
-                  selectedId={selectedBackgroundId}
-                  onSelect={setSelectedBackgroundId}
-                />
-              </div>
+              {expandedSection === 3 && selectedModelId && (
+                <div className="p-6">
+                  <OptionSelector
+                    title=""
+                    options={BACKGROUNDS}
+                    selectedId={selectedBackgroundId}
+                    onSelect={(id) => { setSelectedBackgroundId(id); setExpandedSection(4); }}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Step 4: Details */}
             <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
-              <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-4">
-                <h3 className="text-white font-bold text-lg flex items-center gap-2">
-                  <span className="bg-white text-indigo-600 w-6 h-6 rounded-full flex items-center justify-center text-sm">4</span>
-                  Customize Details
+              <div
+                onClick={() => selectedBackgroundId && setExpandedSection(expandedSection === 4 ? 0 : 4)}
+                className={`bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-4 transition-colors ${selectedBackgroundId ? 'cursor-pointer hover:from-indigo-600 hover:to-purple-600' : 'opacity-60 cursor-not-allowed'}`}
+              >
+                <h3 className="text-white font-bold text-lg flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <span className="bg-white text-indigo-600 w-6 h-6 rounded-full flex items-center justify-center text-sm">4</span>
+                    Customize Details
+                  </span>
+                  <span className="text-2xl">{expandedSection === 4 ? '−' : '+'}</span>
                 </h3>
               </div>
+              {expandedSection === 4 && selectedBackgroundId && (
               <div className="p-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -372,6 +404,7 @@ function MainApp({ user }: { user: User }) {
                 </div>
               </div>
             </div>
+              )}
             </div>
 
             {/* Action Buttons */}

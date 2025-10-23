@@ -1,52 +1,63 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SparklesIcon from './icons/SparklesIcon';
+import { generateSampleImage, SAMPLE_DATA } from '../services/sampleGenerationService';
+
+interface GeneratedSample {
+  before: string;
+  after: string;
+  isLoading: boolean;
+  error: string | null;
+}
 
 const SamplesPage: React.FC = () => {
   const navigate = useNavigate();
+  const [generatedSamples, setGeneratedSamples] = useState<{ [key: string]: GeneratedSample }>({});
 
-  const samples = [
-    {
-      category: 'زنانه',
-      items: [
-        {
-          before: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&h=500&fit=crop',
-          after: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=500&fit=crop',
-        },
-        {
-          before: 'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=400&h=500&fit=crop',
-          after: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400&h=500&fit=crop',
-        },
-      ]
-    },
-    {
-      category: 'مردانه',
-      items: [
-        {
-          before: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&h=500&fit=crop',
-          after: 'https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?w=400&h=500&fit=crop',
-        },
-        {
-          before: 'https://images.unsplash.com/photo-1603252109303-2751441dd157?w=400&h=500&fit=crop',
-          after: 'https://images.unsplash.com/photo-1542327897-d73f4005b533?w=400&h=500&fit=crop',
-        },
-      ]
-    },
-    {
-      category: 'دخترانه',
-      items: [
-        {
-          before: 'https://images.unsplash.com/photo-1503919436766-f2732abb0cac?w=400&h=500&fit=crop',
-          after: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&h=500&fit=crop',
-        },
-        {
-          before: 'https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=400&h=500&fit=crop',
-          after: 'https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=400&h=500&fit=crop',
-        },
-      ]
-    },
-  ];
+  useEffect(() => {
+    // Generate samples on component mount
+    SAMPLE_DATA.forEach((category, categoryIndex) => {
+      category.items.forEach((item, itemIndex) => {
+        const key = `${categoryIndex}-${itemIndex}`;
+        
+        setGeneratedSamples(prev => ({
+          ...prev,
+          [key]: {
+            before: item.clothingUrl,
+            after: '',
+            isLoading: true,
+            error: null
+          }
+        }));
+
+        generateSampleImage(item.clothingUrl, item.modelUrl, item.background)
+          .then(generatedImage => {
+            setGeneratedSamples(prev => ({
+              ...prev,
+              [key]: {
+                before: item.clothingUrl,
+                after: generatedImage,
+                isLoading: false,
+                error: null
+              }
+            }));
+          })
+          .catch(error => {
+            console.error(`Error generating sample ${key}:`, error);
+            setGeneratedSamples(prev => ({
+              ...prev,
+              [key]: {
+                before: item.clothingUrl,
+                after: '',
+                isLoading: false,
+                error: 'خطا در تولید تصویر'
+              }
+            }));
+          });
+      });
+    });
+  }, []);
 
   return (
     <div className="min-h-screen bg-white" dir="rtl">
@@ -80,7 +91,7 @@ const SamplesPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-2 bg-violet-100 rounded-full px-5 py-2 mb-6">
             <SparklesIcon className="w-5 h-5 text-violet-600" />
-            <span className="text-violet-700 font-semibold text-sm">نمونه کارهای ما</span>
+            <span className="text-violet-700 font-semibold text-sm">نمونه کارهای تولید شده با Gemini AI</span>
           </div>
           <h2 className="text-5xl sm:text-6xl font-black text-gray-900 mb-6">
             قبل و بعد از
@@ -98,57 +109,82 @@ const SamplesPage: React.FC = () => {
       {/* Samples Grid */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {samples.map((category, categoryIndex) => (
+          {SAMPLE_DATA.map((category, categoryIndex) => (
             <div key={categoryIndex} className="mb-20 last:mb-0">
               <h3 className="text-4xl font-black text-gray-900 mb-10 text-center">
                 {category.category}
               </h3>
               
               <div className="grid md:grid-cols-2 gap-12">
-                {category.items.map((item, itemIndex) => (
-                  <div key={itemIndex} className="bg-white rounded-3xl shadow-xl overflow-hidden">
-                    <div className="grid grid-cols-2">
-                      {/* Before */}
-                      <div className="relative group">
-                        <img
-                          src={item.before}
-                          alt="قبل"
-                          className="w-full h-80 object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <div className="absolute bottom-4 left-0 right-0 text-center">
-                          <span className="inline-block bg-red-500 text-white px-6 py-2 rounded-full font-bold text-sm">
-                            قبل
-                          </span>
+                {category.items.map((item, itemIndex) => {
+                  const key = `${categoryIndex}-${itemIndex}`;
+                  const sample = generatedSamples[key];
+
+                  return (
+                    <div key={itemIndex} className="bg-white rounded-3xl shadow-xl overflow-hidden relative">
+                      <div className="grid grid-cols-2">
+                        {/* Before */}
+                        <div className="relative group">
+                          <img
+                            src={sample?.before || item.clothingUrl}
+                            alt="قبل"
+                            className="w-full h-80 object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                          <div className="absolute bottom-4 left-0 right-0 text-center">
+                            <span className="inline-block bg-red-500 text-white px-6 py-2 rounded-full font-bold text-sm">
+                              قبل
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* After */}
+                        <div className="relative group">
+                          {sample?.isLoading ? (
+                            <div className="w-full h-80 bg-gradient-to-br from-violet-100 to-indigo-100 flex items-center justify-center">
+                              <div className="text-center">
+                                <svg className="animate-spin h-12 w-12 text-violet-600 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <p className="text-violet-600 font-semibold">در حال تولید...</p>
+                              </div>
+                            </div>
+                          ) : sample?.error ? (
+                            <div className="w-full h-80 bg-red-50 flex items-center justify-center">
+                              <p className="text-red-600 font-semibold">{sample.error}</p>
+                            </div>
+                          ) : (
+                            <>
+                              <img
+                                src={sample?.after}
+                                alt="بعد"
+                                className="w-full h-80 object-cover"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                              <div className="absolute bottom-4 left-0 right-0 text-center">
+                                <span className="inline-block bg-green-500 text-white px-6 py-2 rounded-full font-bold text-sm">
+                                  بعد
+                                </span>
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
                       
-                      {/* After */}
-                      <div className="relative group">
-                        <img
-                          src={item.after}
-                          alt="بعد"
-                          className="w-full h-80 object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <div className="absolute bottom-4 left-0 right-0 text-center">
-                          <span className="inline-block bg-green-500 text-white px-6 py-2 rounded-full font-bold text-sm">
-                            بعد
-                          </span>
+                      {/* Arrow Indicator */}
+                      {!sample?.isLoading && !sample?.error && (
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                          <div className="w-12 h-12 bg-white rounded-full shadow-2xl flex items-center justify-center">
+                            <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
-                    
-                    {/* Arrow Indicator */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                      <div className="w-12 h-12 bg-white rounded-full shadow-2xl flex items-center justify-center">
-                        <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}

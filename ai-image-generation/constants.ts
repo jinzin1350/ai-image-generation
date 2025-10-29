@@ -140,6 +140,38 @@ export const CATEGORIZED_MODELS: Record<string, Option[]> = {
 
 export const ALL_MODELS: Option[] = Object.values(CATEGORIZED_MODELS).flat();
 
+export const HIJAB_OPTIONS: Option[] = [
+  {
+    id: 'hijab_full_scarf',
+    name: 'حجاب کامل با روسری',
+    imageUrl: 'https://picsum.photos/seed/hijab-full-scarf/300/400',
+    prompt: 'wearing a complete hijab with a headscarf covering the head and neck fully, modest Islamic fashion style',
+  },
+  {
+    id: 'hijab_full_shawl',
+    name: 'حجاب کامل با شال',
+    imageUrl: 'https://picsum.photos/seed/hijab-full-shawl/300/400',
+    prompt: 'wearing a complete hijab with a large shawl covering the head and shoulders fully, elegant modest Islamic fashion',
+  },
+  {
+    id: 'hijab_half_scarf',
+    name: 'حجاب نصفه با روسری',
+    imageUrl: 'https://picsum.photos/seed/hijab-half-scarf/300/400',
+    prompt: 'wearing a partial hijab with a loose headscarf showing some hair at the front, modern modest style',
+  },
+  {
+    id: 'hijab_half_shawl',
+    name: 'حجاب نصفه با شال',
+    imageUrl: 'https://picsum.photos/seed/hijab-half-shawl/300/400',
+    prompt: 'wearing a partial hijab with a shawl draped loosely showing some hair, contemporary modest fashion',
+  },
+  {
+    id: 'no_hijab',
+    name: 'بی‌حجاب',
+    imageUrl: 'https://picsum.photos/seed/no-hijab/300/400',
+    prompt: 'without hijab, hair visible and styled naturally',
+  },
+];
 
 export const BACKGROUNDS: Option[] = [
   {

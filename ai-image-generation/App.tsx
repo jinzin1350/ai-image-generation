@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { auth } from './firebase';
 
-import { CATEGORIZED_MODELS, ALL_MODELS, BACKGROUNDS } from './constants';
+import { CATEGORIZED_MODELS, ALL_MODELS, BACKGROUNDS, HIJAB_OPTIONS } from './constants';
 import { generateFashionImage } from './services/geminiService';
 import ImageUploader from './components/ImageUploader';
 import OptionSelector from './components/OptionSelector';
@@ -35,6 +35,7 @@ function App() {
 
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
+  const [selectedHijabId, setSelectedHijabId] = useState<string | null>(null);
   const [selectedBackgroundId, setSelectedBackgroundId] = useState<string | null>(null);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -50,8 +51,8 @@ function App() {
   }, []);
 
   const isReadyToGenerate = useMemo(() => {
-    return uploadedImage && selectedModelId && selectedBackgroundId;
-  }, [uploadedImage, selectedModelId, selectedBackgroundId]);
+    return uploadedImage && selectedModelId && selectedHijabId && selectedBackgroundId;
+  }, [uploadedImage, selectedModelId, selectedHijabId, selectedBackgroundId]);
 
   const handleGenerateClick = async () => {
     if (!isReadyToGenerate || !uploadedImage) return;
@@ -61,11 +62,12 @@ function App() {
     setGeneratedImage(null);
 
     const selectedModel = ALL_MODELS.find(m => m.id === selectedModelId) as Option;
+    const selectedHijab = HIJAB_OPTIONS.find(h => h.id === selectedHijabId) as Option;
     const selectedBackground = BACKGROUNDS.find(b => b.id === selectedBackgroundId) as Option;
-    
+
     try {
       const modelImageBase64 = await imageUrlToBase64(selectedModel.imageUrl);
-      const resultImage = await generateFashionImage(uploadedImage, modelImageBase64, selectedBackground);
+      const resultImage = await generateFashionImage(uploadedImage, modelImageBase64, selectedBackground, selectedHijab);
       setGeneratedImage(resultImage);
     } catch (e: any) {
       console.error("Generation failed:", e);
@@ -78,6 +80,7 @@ function App() {
   const handleReset = () => {
     setUploadedImage(null);
     setSelectedModelId(null);
+    setSelectedHijabId(null);
     setSelectedBackgroundId(null);
     setGeneratedImage(null);
     setError(null);
@@ -137,17 +140,23 @@ function App() {
           {/* Left Panel: Controls */}
           <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg space-y-8 flex flex-col">
             <ImageUploader onImageUpload={setUploadedImage} uploadedImage={uploadedImage} />
-            <OptionSelector 
+            <OptionSelector
               title="2. Choose a Model"
-              options={CATEGORIZED_MODELS} 
-              selectedId={selectedModelId} 
-              onSelect={setSelectedModelId} 
+              options={CATEGORIZED_MODELS}
+              selectedId={selectedModelId}
+              onSelect={setSelectedModelId}
             />
-            <OptionSelector 
-              title="3. Pick a Background"
-              options={BACKGROUNDS} 
-              selectedId={selectedBackgroundId} 
-              onSelect={setSelectedBackgroundId} 
+            <OptionSelector
+              title="3. Select Hijab Style"
+              options={HIJAB_OPTIONS}
+              selectedId={selectedHijabId}
+              onSelect={setSelectedHijabId}
+            />
+            <OptionSelector
+              title="4. Pick a Background"
+              options={BACKGROUNDS}
+              selectedId={selectedBackgroundId}
+              onSelect={setSelectedBackgroundId}
             />
              <div className="mt-auto pt-8 flex flex-col sm:flex-row gap-4">
               <button 

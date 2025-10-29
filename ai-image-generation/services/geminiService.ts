@@ -18,7 +18,8 @@ const getBase64Parts = (base64String: string) => {
 export const generateFashionImage = async (
   clothingImage: string, // base64 string
   modelImage: string, // base64 string
-  background: Option
+  background: Option,
+  hijabOption?: Option
 ): Promise<string> => {
   if (!process.env.API_KEY) {
     throw new Error("API_KEY environment variable is not set.");
@@ -28,7 +29,8 @@ export const generateFashionImage = async (
   const clothingImageParts = getBase64Parts(clothingImage);
   const modelImageParts = getBase64Parts(modelImage);
 
-  const prompt = `Create a high-quality, photorealistic image for a fashion e-commerce website. The image must feature the model from the second image provided, wearing the clothing item from the first image provided. The background should be: ${background.prompt}. The final image should be stylish, professional, and focus on showcasing the clothing item accurately and appealingly on the specified model.`;
+  const hijabPrompt = hijabOption ? ` The model should be ${hijabOption.prompt}.` : '';
+  const prompt = `Create a high-quality, photorealistic image for a fashion e-commerce website. The image must feature the model from the second image provided, wearing the clothing item from the first image provided.${hijabPrompt} The background should be: ${background.prompt}. The final image should be stylish, professional, and focus on showcasing the clothing item accurately and appealingly on the specified model.`;
   
   try {
     const response = await ai.models.generateContent({
